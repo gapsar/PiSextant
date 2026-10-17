@@ -1,0 +1,11 @@
+# Camera + IMU venv on the Pi (capture_run_wave.py), system Python 3.13.
+# Create it WITH the system packages, so picamera2/libcamera and Pillow from
+# apt are visible (sudo apt install python3-picamera2):
+#   python3 -m venv --system-site-packages ~/pisextant-hw
+#   ~/pisextant-hw/bin/pip install -r requirements/pi-hw.txt
+# Versions: the reference instrument, October 2026.
+numpy==2.4.6
+astropy==7.2.0
+pyerfa==2.0.1.5
+adafruit-blinka==9.1.0
+adafruit-circuitpython-lsm6ds==4.6.3

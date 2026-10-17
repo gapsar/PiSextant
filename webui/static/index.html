@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PiSextant</title>
+<link rel="stylesheet" href="/static/vendor/leaflet.css">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>PiSextant</h1>
+  <span class="chip" id="chip-run">run: —</span>
+  <span class="chip" id="chip-solver">solver: off</span>
+  <span class="chip" id="chip-capture">capture: off</span>
+  <span class="chip" id="chip-ntp">clock: ?</span>
+  <span class="chip" id="chip-disk">disk: ?</span>
+  <span class="chip" id="chip-temp">temp: ?</span>
+</header>
+
+<main>
+  <section id="map-pane">
+    <div id="map"></div>
+    <div id="map-buttons">
+      <button onclick="dlKml('gps')">KML: GPS</button>
+      <button onclick="dlKml('smoothed')">KML: smoothed</button>
+      <button onclick="dlKml('fixes')">KML: fixes</button>
+      <label><input type="checkbox" id="follow" checked> follow</label>
+    </div>
+  </section>
+
+  <section id="side">
+    <div class="panel">
+      <h2>Processes</h2>
+      <div class="row">
+        <button id="btn-solver" onclick="toggleProc('solver')">start solver</button>
+        <select id="solver-config">
+          <option value="configs/optimized.json">optimized</option>
+          <option value="configs/default.json">default</option>
+        </select>
+      </div>
+      <div class="row">
+        <button id="btn-capture" onclick="toggleProc('capture')">start capture</button>
+        <label>duration <input id="cap-min" type="number" min="1" value="30" style="width:4em"> min</label>
+        <label>save 1 image in <input id="cap-png" type="number" min="1" value="30" style="width:4em"></label>
+      </div>
+      <pre id="proc-log"></pre>
+    </div>
+
+    <div class="panel">
+      <h2>Session checklist</h2>
+      <div id="checklist" class="hint">no active run</div>
+    </div>
+
+    <div class="panel">
+      <h2>Live fix</h2>
+      <div id="fix-info">no fix yet</div>
+      <div id="err-info"></div>
+      <pre id="solve-feed"></pre>
+    </div>
+
+    <div class="panel">
+      <h2>IMU</h2>
+      <div class="hint">gravity (m/s², last 60 s)</div>
+      <canvas id="grav-chart" width="360" height="120"></canvas>
+      <div id="grav-info"></div>
+      <div class="hint">temperature (°C, whole run)</div>
+      <canvas id="temp-chart" width="360" height="80"></canvas>
+    </div>
+
+    <div class="panel">
+      <h2>Truth (reference position)</h2>
+      <div class="row">
+        <input id="pos-lat" placeholder="lat (dec deg)" style="width:8em">
+        <input id="pos-lon" placeholder="lon (dec deg)" style="width:8em">
+        <button onclick="setPosition()">set</button>
+        <button onclick="clearPosition()">clear</button>
+      </div>
+      <div id="pos-info" class="hint">no fixed position</div>
+      <div class="hint">or GPS from the laptop:
+        <code>python nmea_logger.py --port /dev/ttyUSB0 --forward http://&lt;pi&gt;:8080</code></div>
+      <div id="gps-info">no GPS yet</div>
+    </div>
+
+    <div class="panel">
+      <h2>Runs</h2>
+      <div class="row">
+        <select id="run-select"></select>
+        <button onclick="watchRun()">load</button>
+        <button onclick="watchLatest()">follow latest</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Offline map tiles</h2>
+      <div class="row">
+        <label>zoom <input id="tile-zmin" type="number" value="3" style="width:3em">
+        – <input id="tile-zmax" type="number" value="10" style="width:3em"></label>
+        <button onclick="tileEstimate()">estimate (current view)</button>
+        <button onclick="tileDownload()">download</button>
+        <button onclick="tilePurge()">purge blocked</button>
+      </div>
+      <div id="tile-status"></div>
+      <div class="hint">world base: zoom out fully, zoom 0–6. Detail: frame your
+        area, zoom 7–12 max. Tiles cache on the Pi and work offline afterwards.
+        403 blocked? Marine/shared IPs are often blocked by OSM — put a free
+        MapTiler/Stadia key URL in <code>webui_config.json</code> (notes
+        inside).</div>
+    </div>
+  </section>
+</main>
+<script src="/static/vendor/leaflet.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

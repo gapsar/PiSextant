@@ -1,0 +1,15 @@
+diff --git a/tetra3/tetra3.py b/tetra3/tetra3.py
+index ac381a3..faaa403 100644
+--- a/tetra3/tetra3.py
++++ b/tetra3/tetra3.py
+@@ -1787,6 +1787,10 @@ class Tetra3():
+             self._logger.debug('Trimmed %d match centroids to %d' %
+                                (num_centroids, len(image_centroids)))
+             num_centroids = len(image_centroids)
++            # Pattern indices were computed against the untrimmed list and
++            # must not point past the end of the trimmed one.
++            pattern_centroids_inds = pattern_centroids_inds[pattern_centroids_inds < num_centroids]
++            num_pattern_centroids = len(pattern_centroids_inds)
+ 
+         if isinstance(distortion, (list, tuple)):
+             self._logger.warning('Tuple distortion %s no longer supported, ignoring' % distortion)

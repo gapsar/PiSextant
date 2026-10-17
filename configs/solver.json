@@ -1,0 +1,28 @@
+{
+  "name": "pisextant-default",
+  "database": {
+    "path": "data/database_1.npz",
+    "build_params": {
+      "max_fov": 68.315,
+      "star_catalog": "hip_main",
+      "star_max_magnitude": 6.5,
+      "pattern_max_error": 0.005,
+      "pattern_stars_per_fov": 22,
+      "verification_stars_per_fov": 75
+    }
+  },
+  "detect": {
+    "sigma": 3.75,
+    "binning": 2,
+    "max_centroids": 95
+  },
+  "solve": {
+    "fov_estimate": 68.9,
+    "fov_max_error": 4.0,
+    "pattern_checking_stars": 6,
+    "match_radius": 0.0031591789919661237,
+    "match_threshold": 0.009992302428652526,
+    "distortion": 0.020000000000000018,
+    "solve_timeout": 3000
+  }
+}

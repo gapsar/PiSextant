@@ -1,0 +1,23 @@
+# PiSextant web UI -- systemd unit, starts the webui at boot.
+# Replace YOUR_USER and the path if the repo is not in your home:
+#   sed -i "s/YOUR_USER/$USER/g" systemd/pisextant-webui.service
+#   sudo cp systemd/pisextant-webui.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now pisextant-webui
+# Then browse to http://<pi-address>:8080
+# The webui itself needs only the system python3 (standard library).
+
+[Unit]
+Description=PiSextant web UI
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USER
+WorkingDirectory=/home/YOUR_USER/PiSextant/webui
+ExecStart=/usr/bin/python3 /home/YOUR_USER/PiSextant/webui/server.py --port 8080
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

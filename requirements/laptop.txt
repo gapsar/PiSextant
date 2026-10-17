@@ -1,0 +1,10 @@
+# Analysis and calibration tools on a laptop (calibrate_affine.py, rezero.py,
+# fit_mcase.py, sea_eval.py, multiheading_fix.py, drift_check.py,
+# nmea_logger.py). replay_solve.py and build_database.py also need cedar-solve
+# (see the README, "Solver").
+numpy
+scipy
+astropy
+pyerfa
+pillow
+pyserial

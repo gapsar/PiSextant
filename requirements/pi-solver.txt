@@ -1,0 +1,12 @@
+# Solver venv on the Pi (solve_worker.py). Needs Python 3.11 (or 3.12):
+# cedar-solve requires numpy < 2, which has no build for Python 3.13.
+# With uv (https://docs.astral.sh/uv/):
+#   uv venv --python 3.11 ~/pisextant-solver
+#   uv pip install --python ~/pisextant-solver -r requirements/pi-solver.txt
+# cedar-solve itself is installed from its patched git checkout (README, step 3).
+# Versions: the reference instrument, October 2026.
+numpy==1.26.4
+scipy==1.17.1
+Pillow==9.5.0
+grpcio==1.80.0
+protobuf==6.33.6

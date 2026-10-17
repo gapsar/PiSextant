@@ -1,0 +1,8 @@
+{
+  "camera_python": "~/pisextant-hw/bin/python",
+  "tetra3_python": "~/pisextant-solver/bin/python",
+  "solver_config": "configs/solver.json",
+  "tile_url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  "tile_user_agent": "PiSextant-webui/1.0 (celestial navigation; contact: YOUR-EMAIL-OR-URL)",
+  "max_tiles_per_job": 20000
+}

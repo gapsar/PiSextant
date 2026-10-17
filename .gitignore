@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Run data (large: logs ~0.5 GB per 3 h, images ~125 MB/min when all saved)
+runs/*
+!runs/.gitkeep
+gps_logs/
+
+# Per-device calibration and local settings (your own instrument)
+configs/m_case.json
+configs/r_cal_*.json
+webui/webui_config.json
+
+# Webui map tile cache
+webui/tiles/
+webui/tiles_download/
+webui/*.log

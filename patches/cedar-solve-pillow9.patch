@@ -1,0 +1,13 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index db8cf9c..37910cb 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -22,7 +22,7 @@ classifiers = [
+ 
+ dependencies = [
+     "numpy >= 1.21.1,<2",
+-    "Pillow >= 8.3.1,<9",
++    "Pillow >= 9,<10",
+     'scipy >= 1.7.1,<2',
+ ]
+ 
