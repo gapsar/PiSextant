@@ -110,6 +110,8 @@ To get the accuracy above, calibrate the instrument once at a known position:
 [docs/calibration.md](docs/calibration.md). Then fix it on the ship and
 re-zero it.
 
+Using an AI assistant? Give it [startup_for_ai.md](startup_for_ai.md) first.
+
 More: [running from the command line](docs/running.md),
 [checking a run against GPS](docs/checking-a-run.md), and the
 [full documentation](docs/README.md).
