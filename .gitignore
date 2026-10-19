@@ -7,9 +7,10 @@ runs/*
 !runs/.gitkeep
 gps_logs/
 
-# Per-device calibration and local settings (your own instrument)
-configs/m_case.json
-configs/r_cal_*.json
+# Your own instrument: configs and calibration, built databases, webui settings
+configs/*
+!configs/README.md
+data/
 webui/webui_config.json
 
 # Webui map tile cache

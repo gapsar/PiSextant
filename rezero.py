@@ -17,14 +17,14 @@ the rotation about the vertical stays invisible, but it also does not
 change the fix while the ship stays near level.
 
 It writes a new calibration file (A, b and c all rotated) to copy to the Pi
-as configs/r_cal_ism330dhcx.json, and prints the error per run before/after.
+as configs/accel_cal.json, and prints the error per run before/after.
 
-    python rezero.py runs/<flat> runs/<tilted> --cal configs/r_cal_ism330dhcx.json \\
+    python rezero.py runs/<flat> runs/<tilted> --cal configs/accel_cal.json \\
         --position=48.8566,2.3522 --out data/cal_rezero_<date>.json
 
 (write --position=-21.0,55.3 with '=' when the latitude is negative)
 
-    python rezero.py runs/<sea run with gps.jsonl> --cal configs/r_cal_ism330dhcx.json \
+    python rezero.py runs/<sea run with gps.jsonl> --cal configs/accel_cal.json \
         --out data/cal_rezero_<date>.json
 """
 
@@ -111,7 +111,7 @@ def main():
                 "note": f"{cal.get('note', '')}; re-zeroed on {', '.join(os.path.basename(r) for r in data)}"})
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     json.dump(out, open(args.out, "w"), indent=2)
-    print(f"\nWrote {args.out} -- copy it to the Pi as configs/r_cal_ism330dhcx.json")
+    print(f"\nWrote {args.out} -- copy it to the Pi as configs/accel_cal.json")
 
 
 if __name__ == "__main__":

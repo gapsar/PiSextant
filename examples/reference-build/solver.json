@@ -1,7 +1,7 @@
 {
-  "name": "pisextant-default",
+  "name": "reference-build",
   "database": {
-    "path": "data/database_1.npz",
+    "path": "examples/reference-build/database.npz",
     "build_params": {
       "max_fov": 68.315,
       "star_catalog": "hip_main",

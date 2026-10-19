@@ -28,7 +28,7 @@ Requirements for a good result:
 Usage (static, berth/anchor):
     python multiheading_fix.py runs/<r1> runs/<r2> runs/<r3> ...
     ... --position=48.8566,2.3522      # optional: truth, for evaluation only
-    ... --cal configs/r_cal_ism330dhcx.json  # optional: recompute every fix with
+    ... --cal configs/accel_cal.json  # optional: recompute every fix with
                                              # one calibration (default: the fixes
                                              # logged live by the capture)
 Under way (testing against GPS):

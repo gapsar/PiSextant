@@ -17,7 +17,7 @@ Usage:
     python replay_solve.py runs/<run_id>                       # replay the run's own config
     python replay_solve.py runs/<run_id> --config configs/candidate.json
     python replay_solve.py runs/<run_id> --config ... --name candidate2
-    python replay_solve.py runs/<run_id> --cal configs/r_cal_ism330dhcx.json
+    python replay_solve.py runs/<run_id> --cal configs/accel_cal.json
 
 Needs cedar-solve installed (import tetra3) with a cedar-detect-server
 executable built for this computer (set CEDAR_DETECT_BINARY or --cedar-binary

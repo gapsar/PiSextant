@@ -1,0 +1,17 @@
+{
+  "camera": {
+    "name": "Raspberry Pi Camera Module 3 (IMX708), standard lens",
+    "sensor_mode": 1,
+    "exposure_us": 300000,
+    "analogue_gain": 12.0,
+    "lens_position": 0.0,
+    "pixel_size_um": 1.4,
+    "sensor_width_px": 4608,
+    "focal_length_mm": 4.74,
+    "notes": "sensor_mode 1 = 2304x1296 binned, ~68.2 deg horizontal FOV (measured by the solver)"
+  },
+  "imu": {
+    "driver": "ism330dhcx",
+    "address": "0x6a"
+  }
+}

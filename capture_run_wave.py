@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Best-fix capture script -- runs on the Pi, camera venv. Captures frames,
-reads the ISM330DHCX IMU, gets each frame solved by solve_worker.py, computes
-a position fix and logs everything into a self-contained run folder.
+"""Capture script -- runs on the Pi, capture venv. Captures frames, reads the
+IMU, gets each frame solved by solve_worker.py, computes a position fix and
+logs everything into a self-contained run folder.
 
 Main features:
 
@@ -14,10 +14,10 @@ Main features:
    gravity averaged over a trailing window, every IMU sample carried to the
    exposure's body frame with the gyro-integrated attitude, so wave
    acceleration is near zero-mean over the window. Off by default because
-   the ISM gyro's zero-rate offset (~0.1-0.4 deg/s, drifting with
-   temperature) is not corrected yet: over a 20 s window it fakes 1-2 deg of
-   rotation (measured 2026-09-22: ~76 nmi vs ~13 nmi without). "gravity_wave_gyro"
-   is still logged per frame whenever --wave-s > 0.
+   the gyro's zero-rate offset is not corrected yet: on the reference IMU
+   (~0.1-0.4 deg/s, drifting with temperature) a 20 s window faked 1-2 deg
+   of rotation (~76 nmi vs ~13 nmi without). "gravity_wave_gyro" is still
+   logged per frame whenever --wave-s > 0.
 
 3. Temperature log: temp.jsonl, one record every ~5 s (degrees C).
 
@@ -25,12 +25,13 @@ Logs, per run folder: run_meta.json, images/, imu.jsonl (t, gravity = raw
 accel, gyro), temp.jsonl, capture.jsonl, solves/live-<config>.jsonl. The
 run is finalized cleanly on Ctrl-C and on SIGTERM (the webui's stop button).
 
-Calibration files (see the README, "Calibration"), both in configs/:
+Configuration files, all in configs/ (see configs/README.md; the reference
+build's files are in examples/reference-build/):
 
-    m_case.json              camera-to-IMU mounting rotation (fit_mcase.py);
-                             without it, the reference enclosure's value
-    r_cal_ism330dhcx.json    accelerometer calibration (calibrate_affine.py,
-                             rezero.py); without it the fixes are uncalibrated
+    instrument.json   camera settings and IMU driver (required)
+    m_case.json       camera-to-IMU mounting rotation (fit_mcase.py)
+    accel_cal.json    accelerometer calibration (calibrate_affine.py,
+                      rezero.py); without it the fixes are uncalibrated
 
 Start solve_worker.py (solver venv) first, then:
 
@@ -55,69 +56,81 @@ import numpy as np
 from PIL import Image
 from astropy.time import Time
 from picamera2 import Picamera2
-from libcamera import controls
 
 import imu_backends
 
-VERSION = "2.0"   # ISM330DHCX only (BNO08x support removed 2026-10-08)
+VERSION = "2.1"   # sensors and mounting from configs/ (2026-10-20)
 
 REPO_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_DIR = os.path.join(REPO_DIR, "configs")
 SOCKET_PATH = "/tmp/pisextant_solver.sock"
 SHM_DIR = "/dev/shm"
 
-# Wave compensation window. Default OFF: the ISM gyro's zero-rate offset
-# (~0.1-0.4 deg/s, drifting with temperature) is not corrected yet, and over a
-# 20 s window it fakes 1-2 deg of rotation (~76 nmi measured 2026-09-22, vs ~13
-# nmi with the plain exposure median). 20 s is the window validated at sea
-# with the old fused sensor; pass --wave-s 20 to try it.
+# Wave compensation window. Default OFF: the gyro's zero-rate offset is not
+# corrected yet (see the docstring). Pass --wave-s 20 to try it.
 WAVE_DEFAULT_S = 0.0
 SMOOTH_WINDOW_S = 60.0  # trailing fix-position mean; wave-band error is gone
-                        # (decorrelated by ~40 s, validated on the 07-18 runs)
+                        # (decorrelated by ~40 s at sea)
 SMOOTH_GATE_DEG = 5.0   # fixes this far from the window median are false solves
-
-# Baseline camera settings: everything fixed, so frames are comparable across
-# the whole run (auto WB would change the grayscale response frame to frame).
-SENSOR_MODE = 1
-CAMERA_CONTROLS = {
-    "ExposureTime": 300_000,       # microseconds (300 ms)
-    "AnalogueGain": 12.0,
-    "AfMode": controls.AfModeEnum.Manual,
-    "LensPosition": 0.0,           # dioptres, 0.0 = infinity
-    "AwbEnable": False,
-    "ColourGains": (1.0, 1.0),     # exact values don't matter, consistency does
-}
 
 TEMP_LOG_EVERY_S = 5.0             # one temp.jsonl record every ~5 s
 
-# Camera-to-IMU mounting rotation. configs/m_case.json (written by
-# fit_mcase.py) overrides it. The built-in value is the reference enclosure's
-# (camera ~23 deg off the ISM's -Y axis, measured 2026-09-22): a good start
-# if you mount the boards the same way. The accelerometer calibration is fit
-# on top of this matrix: change one, refit the other.
-M_CASE_PATH = os.path.join(REPO_DIR, "configs", "m_case.json")
-M_CASE_REFERENCE = np.array([
-    [+0.075219, -0.918529, -0.388133],   # camera boresight
-    [-0.996835, -0.079315, -0.005482],   # camera left
-    [-0.025750, +0.387317, -0.921587],   # camera up
-])
+
+def load_instrument(path):
+    """configs/instrument.json: the "camera" and "imu" sections."""
+    if not os.path.exists(path):
+        sys.exit(f"{path} not found. Write it for your hardware (see "
+                 "configs/README.md), or copy "
+                 "examples/reference-build/instrument.json for the reference build.")
+    cfg = json.load(open(path))
+    for key in ("camera", "imu"):
+        if key not in cfg:
+            sys.exit(f'{path}: the "{key}" section is missing')
+    return cfg
+
+
+def camera_controls(cam):
+    """libcamera controls from the "camera" section. Everything is fixed, so
+    frames are comparable across the whole run (auto exposure or white
+    balance would change the grayscale response frame to frame)."""
+    ctrl = {
+        "ExposureTime": int(cam.get("exposure_us", 300000)),
+        "AnalogueGain": float(cam.get("analogue_gain", 8.0)),
+        "AwbEnable": False,
+        "ColourGains": (1.0, 1.0),   # exact values don't matter, consistency does
+    }
+    if cam.get("lens_position") is not None:   # only for autofocus cameras
+        from libcamera import controls
+        ctrl["AfMode"] = controls.AfModeEnum.Manual
+        ctrl["LensPosition"] = float(cam["lens_position"])   # dioptres, 0 = infinity
+    return ctrl
+
+
+INSTRUMENT_PATH = os.path.join(CONFIG_DIR, "instrument.json")
+
+# Camera-to-IMU mounting rotation (rows: camera boresight, left, up, in IMU
+# axes), written by fit_mcase.py. The accelerometer calibration is fit on
+# top of this matrix: change one, refit the other. Without the file the
+# identity is used and the fixes are wrong until you calibrate.
+M_CASE_PATH = os.path.join(CONFIG_DIR, "m_case.json")
 
 
 def load_m_case(path):
-    """(M_CASE, source): configs/m_case.json if present, else the reference."""
+    """(M_CASE, source): configs/m_case.json if present, else the identity."""
     if os.path.exists(path):
         return np.array(json.load(open(path))["M_case"], dtype=float), path
-    return M_CASE_REFERENCE, "reference enclosure (built-in)"
+    return np.eye(3), "identity (configs/m_case.json missing -- NOT calibrated)"
 
 
 M_CASE, M_CASE_SOURCE = load_m_case(M_CASE_PATH)
 
-# Fine calibration (protocol step 5), copied to the Pi's configs/. Two formats:
-#   {"A": 3x3, "b": [3]}   affine accel model true_up ~ normalize(A@m + b),
-#                          fit by calibrate_affine.py on a multi-orientation
-#                          session, valid at any mount orientation
-#   {"r_cal": 3x3}         rotation-only, valid at the orientation it was fit
+# Accelerometer calibration. Two formats:
+#   {"A": 3x3, "b": [3], "c": [3], "temp_ref_c": T0}
+#                          affine model true_up ~ normalize(A@m + b + c(T-T0)),
+#                          from calibrate_affine.py / rezero.py
+#   {"r_cal": 3x3}         rotation only, valid at the orientation it was fit
 # Without the file the run uses M_CASE alone (identity calibration).
-R_CAL_PATH = os.path.join(REPO_DIR, "configs", "r_cal_ism330dhcx.json")
+R_CAL_PATH = os.path.join(CONFIG_DIR, "accel_cal.json")
 
 
 def load_cal(path):
@@ -302,7 +315,7 @@ def smoothed_fix(fix_history, window_s, gate_deg=SMOOTH_GATE_DEG):
 # --- IMU --------------------------------------------------------------------
 
 class ImuLogger:
-    """Polls the ISM330DHCX in a background thread. Streams every sample to
+    """Polls the IMU in a background thread. Streams every sample to
     imu.jsonl (t, gravity = raw accel in m/s^2, gyro in rad/s) and keeps a
     history of (t, gravity, gyro-integrated attitude, gravity-in-gyro-frame)
     long enough for the trailing wave window. The gyro-frame gravity is
@@ -313,8 +326,8 @@ class ImuLogger:
     Only relative rotations across the wave window are used; its weakness is
     the gyro's zero-rate offset, uncorrected for now (see WAVE_DEFAULT_S)."""
 
-    def __init__(self, jsonl_path, temp_jsonl_path, wave_s):
-        self.imu = imu_backends.make_imu()
+    def __init__(self, jsonl_path, temp_jsonl_path, wave_s, imu_cfg):
+        self.imu = imu_backends.make_imu(imu_cfg)
         self.temp_file = open(temp_jsonl_path, "a")
         self.temp_samples = 0
         self._t_last_temp = 0.0
@@ -336,6 +349,9 @@ class ImuLogger:
         try:
             temp = self.imu.temperature
         except Exception:
+            return
+        if temp is None:          # sensor without a thermometer
+            self._t_last_temp = t
             return
         self.temp_file.write(json.dumps({
             "t": round(t, 2),
@@ -462,11 +478,15 @@ def main():
                              "All images cost ~125 MB per minute; they serve "
                              "offline re-solving only -- the fix and the "
                              "calibration use the logs")
-    parser.add_argument("--runs-dir", default="runs")
+    parser.add_argument("--runs-dir", default=os.path.join(REPO_DIR, "runs"))
     parser.add_argument("--socket", default=SOCKET_PATH)
     args = parser.parse_args()
 
     signal.signal(signal.SIGTERM, _stop_on_sigterm)
+    instrument = load_instrument(INSTRUMENT_PATH)
+    cam_cfg, imu_cfg = instrument["camera"], instrument["imu"]
+    cam_controls = camera_controls(cam_cfg)
+    sensor_mode = int(cam_cfg.get("sensor_mode", 0))
 
     run_id = time.strftime("%Y-%m-%d_%H-%M-%S")
     run_dir = os.path.join(args.runs_dir, run_id)
@@ -493,7 +513,7 @@ def main():
               + (f", with temperature term (T0 {CAL_T0:g} C)" if CAL_C is not None else ""))
     else:
         print(f"WARNING: {R_CAL_PATH} not found -- using M_CASE alone, fixes "
-              f"will be UNCALIBRATED. Copy the affine calibration json there.")
+              f"will be UNCALIBRATED (see docs/calibration.md).")
     print(f"Wave compensation: " + (f"trailing {args.wave_s:g} s window"
                                     if args.wave_s > 0 else "OFF"))
     print(f"Smoothed fix: " + (f"trailing {args.smooth_s:g} s mean"
@@ -501,7 +521,7 @@ def main():
 
     # Camera
     picam2 = Picamera2()
-    mode = picam2.sensor_modes[SENSOR_MODE]
+    mode = picam2.sensor_modes[sensor_mode]
     width, height = mode["size"]
     config = picam2.create_still_configuration(
         # YUV420: the Y plane IS the grayscale image (BT.601 luma), so no
@@ -510,14 +530,15 @@ def main():
         sensor={"output_size": mode["size"], "bit_depth": mode["bit_depth"]},
     )
     picam2.configure(config)
-    picam2.set_controls(CAMERA_CONTROLS)
+    picam2.set_controls(cam_controls)
     picam2.start()
     for _ in range(3):   # let exposure/gain settle before the run starts
         picam2.capture_request().release()
 
     # IMU
     imu = ImuLogger(os.path.join(run_dir, "imu.jsonl"),
-                    os.path.join(run_dir, "temp.jsonl"), wave_s=args.wave_s)
+                    os.path.join(run_dir, "temp.jsonl"), wave_s=args.wave_s,
+                    imu_cfg=imu_cfg)
     imu.start()
     print("Camera and IMU ready.")
     if args.wave_s > 0:
@@ -542,15 +563,17 @@ def main():
         "planned_duration_min": args.duration_min,
         "png_every": args.png_every,
         "camera": {
-            "sensor_mode": SENSOR_MODE,
+            "name": cam_cfg.get("name"),
+            "sensor_mode": sensor_mode,
             "size": [width, height],
             "bit_depth": mode["bit_depth"],
             "controls": {k: (v if isinstance(v, (int, float)) else str(v))
-                         for k, v in CAMERA_CONTROLS.items()},
+                         for k, v in cam_controls.items()},
             "image_format": "grayscale PNG from YUV420 Y plane (BT.601 luma)",
         },
         "imu": {
-            "sensor": imu_backends.NAME,
+            "sensor": imu_cfg.get("driver"),
+            "config": imu_cfg,
             "streams": ["gravity (raw accel, m/s^2)", "gyro (rad/s)"],
             "temperature_log": {
                 "file": "temp.jsonl",

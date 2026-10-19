@@ -4,7 +4,7 @@
   2.0), Steven Rosenthal's fork of [tetra3](https://github.com/esa/tetra3)
   (ESA, Apache 2.0); star detection:
   [cedar-detect](https://github.com/smroid/cedar-detect) (Steven Rosenthal).
-- Star catalog: Hipparcos (ESA), in `data/database_1.npz`.
+- Star catalog: Hipparcos (ESA), in the star databases (`examples/reference-build/database.npz`, and the one you build).
 - Time and Earth orientation: [astropy](https://www.astropy.org) and
   [ERFA](https://github.com/liberfa/erfa).
 - Map: [Leaflet](https://leafletjs.com) 1.9.4 (BSD 2-Clause, see

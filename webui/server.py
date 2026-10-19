@@ -564,8 +564,8 @@ def kml_doc(name, coords, color):
 # --- Session checklist -----------------------------------------------------
 
 def build_checklist(meta, ntp, clock):
-    """Green-light checks for the ACTIVE run (ISM330DHCX): clock synced,
-    affine calibration loaded, sensor temperature stable (the ISM's offsets
+    """Green-light checks for the ACTIVE run: clock synced,
+    affine calibration loaded, sensor temperature stable (IMU offsets
     move with temperature, ~10 min after power-on)."""
     if not meta:
         return {"items": []}
@@ -582,7 +582,7 @@ def build_checklist(meta, ntp, clock):
                   "ok": cal == "affine",
                   "detail": f"cal_kind={cal}" + ("" if cal == "affine" else
                             " -- copy the affine json to "
-                            "configs/r_cal_ism330dhcx.json")})
+                            "configs/accel_cal.json")})
 
     temps = STATE.temps
     plateau = None
@@ -610,7 +610,7 @@ def build_checklist(meta, ntp, clock):
 # --- Utilities --------------------------------------------------------------
 
 def clock_source(ntp):
-    """'ntp' when synced; 'rtc' when not synced but the DS3231 is there (it
+    """'ntp' when synced; 'rtc' when not synced but a hardware RTC is there (it
     set the time at boot); 'none' when neither (the time can be wrong)."""
     if ntp:
         return "ntp"

@@ -1,4 +1,7 @@
-# Hardware
+# Hardware (reference build)
+
+This is the hardware of the reference instrument. Other cameras and IMUs can
+work: see [Other cameras and IMUs](other-sensors.md).
 
 <!-- PHOTO: the parts, the wiring, the inside of the enclosure -->
 

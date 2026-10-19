@@ -17,10 +17,10 @@ position (see the README, "Calibration", for the exact protocol).
 Usage:
     python calibrate_affine.py runs/<r1> runs/<r2> ...   # the session's runs
     python calibrate_affine.py runs/                     # every run inside
-    ... --position=LAT,LON --temp --out configs/r_cal_ism330dhcx.json
+    ... --position=LAT,LON --temp --out configs/accel_cal.json
 
-Temperature (--temp): the ISM330DHCX accelerometer offset moves with its
-temperature (~1.5 nmi/deg C of fix drift, measured 2026-10-09). --temp adds a
+Temperature (--temp): MEMS accelerometer offsets move with the sensor
+temperature (reference build: ~1.5 nmi/deg C of fix drift). --temp adds a
 term c * (T - T0) to the model (3 more parameters), T being the sensor
 temperature at each frame from temp.jsonl. It needs runs spanning a range of
 temperatures (capture warms the Pi: start cold, keep capturing ~20 min).
@@ -35,7 +35,7 @@ per-fix median error, plus a leave-one-orientation-out validation (runs are
 auto-grouped by gravity direction; each group is held out, the model refit
 on the rest and scored on it -- the honest transfer number). Writes the
 calibration json, which capture_run_wave.py reads as
-configs/r_cal_ism330dhcx.json on the Pi.
+configs/accel_cal.json on the Pi.
 """
 
 import argparse
@@ -309,7 +309,7 @@ def main():
     with open(args.out, "w") as f:
         json.dump(out, f, indent=2)
     print(f"\nWrote {args.out} -- copy it to the Pi as "
-          f"configs/r_cal_ism330dhcx.json")
+          f"configs/accel_cal.json")
 
 
 if __name__ == "__main__":

@@ -13,9 +13,11 @@ and track in a web page.
 
 ## What you need
 
-- Raspberry Pi Zero 2 W, Raspberry Pi Camera Module 3 (standard lens),
-  Adafruit ISM330DHCX IMU, DS3231 RTC module, an enclosure.
-- Parts list, wiring and mounting rules: [docs/hardware.md](docs/hardware.md).
+- A Raspberry Pi with a camera that picamera2 supports, an I²C IMU
+  (accelerometer + gyroscope), a real-time clock module, and a rigid enclosure.
+- The reference build (parts, wiring, mounting rules):
+  [docs/hardware.md](docs/hardware.md). For other sensors:
+  [docs/other-sensors.md](docs/other-sensors.md).
 
 ## Install
 
@@ -32,9 +34,9 @@ git clone <this repository> ~/PiSextant
 sudo reboot
 ```
 
-After the reboot, check the sensors with `i2cdetect -y 1` (`6a` = IMU,
-`68` = RTC). When the Pi has network, save the time in the RTC:
-`sudo hwclock -w`.
+After the reboot, check the sensors with `i2cdetect -y 1` (for the reference
+build: `6a` = IMU, `68` = RTC). When the Pi has network, save the time in the
+RTC: `sudo hwclock -w`.
 
 **2. Capture venv (camera + IMU)**
 
@@ -70,7 +72,19 @@ printf '[utils.iers.iers]\nauto_max_age = 365\n' >> ~/.astropy/config/astropy.cf
 ~/pisextant-hw/bin/python -c "from astropy.utils import iers; iers.IERS_Auto.open()"
 ```
 
-**5. Web interface at boot**
+**5. Describe your instrument** (files in `configs/`, see
+[configs/README.md](configs/README.md))
+
+```bash
+cd ~/PiSextant
+# the reference build: start from its files
+cp examples/reference-build/instrument.json examples/reference-build/solver.json configs/
+cp examples/reference-build/m_case.json configs/            # only with the same enclosure
+# other hardware: write instrument.json, an IMU driver and a star database,
+# see docs/other-sensors.md
+```
+
+**6. Web interface at boot**
 
 ```bash
 cd ~/PiSextant

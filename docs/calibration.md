@@ -6,7 +6,7 @@ instrument, so git ignores them.
 | File | Content | Made by |
 |---|---|---|
 | `configs/m_case.json` | rotation from the IMU frame to the camera frame | `fit_mcase.py` |
-| `configs/r_cal_ism330dhcx.json` | accelerometer model: matrix `A`, offset `b`, temperature term `c` | `calibrate_affine.py`, then `rezero.py` |
+| `configs/accel_cal.json` | accelerometer model: matrix `A`, offset `b`, temperature term `c` | `calibrate_affine.py`, then `rezero.py` |
 
 The model is
 
@@ -24,8 +24,9 @@ run on a laptop: copy the run folders from the Pi (`runs/<run>/`) first.
 
 ## Step 1: mounting rotation (M_CASE)
 
-Without `configs/m_case.json`, the capture uses the value of the reference
-enclosure. If your boards are mounted differently, measure it:
+Without `configs/m_case.json`, the capture uses the identity and the fixes are
+wrong. If you built the reference enclosure, you can start from
+`examples/reference-build/m_case.json`; otherwise measure it:
 
 1. Record two runs of about 10 minutes at the known position: one with the
    enclosure flat, one with one side lifted by 20-30°.
@@ -54,14 +55,14 @@ orientations.
 
    ```bash
    python calibrate_affine.py runs/<r1> runs/<r2> ... --position=48.8566,2.3522 \
-       --temp --out configs/r_cal_ism330dhcx.json
+       --temp --out configs/accel_cal.json
    ```
 
    It prints the error per run and a "leave one orientation out" test, which
    is the honest number for a new orientation. Copy the file to the Pi.
 
 The capture reads both files at its start. A run without
-`r_cal_ism330dhcx.json` is uncalibrated, and the webui checklist shows it.
+`accel_cal.json` is uncalibrated, and the webui checklist shows it.
 
 ## Step 3: re-zero (after a knock, or once installed on the ship)
 
@@ -72,8 +73,8 @@ rotation:
 - **At a known fixed position:** one flat run and one tilted run (~30°):
 
   ```bash
-  python rezero.py runs/<flat> runs/<tilted> --cal configs/r_cal_ism330dhcx.json \
-      --position=48.8566,2.3522 --out configs/r_cal_ism330dhcx.json.new
+  python rezero.py runs/<flat> runs/<tilted> --cal configs/accel_cal.json \
+      --position=48.8566,2.3522 --out configs/accel_cal.json.new
   ```
 
 - **At sea, with the ship's GPS track** in each run's `gps.jsonl`: one or more
@@ -81,8 +82,8 @@ rotation:
   different headings, give a better result than one run.
 
   ```bash
-  python rezero.py runs/<night1> runs/<night2> --cal configs/r_cal_ism330dhcx.json \
-      --out configs/r_cal_ism330dhcx.json.new
+  python rezero.py runs/<night1> runs/<night2> --cal configs/accel_cal.json \
+      --out configs/accel_cal.json.new
   ```
 
 Then replace the file on the Pi (keep a copy of the old one).

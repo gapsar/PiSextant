@@ -36,4 +36,4 @@ Ctrl-C or the stop button finishes the run cleanly.
 Main capture options: `--duration-min`, `--png-every N` (default 10; all
 images cost about 125 MB per minute), `--smooth-s` (averaging window, default
 60 s). `--wave-s` (gyro-based wave compensation) is off by default: the gyro
-offset of the ISM330DHCX is not corrected yet and makes it worse.
+offset is not corrected yet and makes it worse (measured on the reference build).

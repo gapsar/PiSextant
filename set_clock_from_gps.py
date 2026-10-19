@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Discipline the Pi's clock from the GPS (or NTP), then write the DS3231 RTC.
+"""Discipline the Pi's clock from the GPS (or NTP), then write the RTC (e.g. a DS3231).
 
 Runs on the Pi. The Pi Zero has no built-in RTC, so with no network it boots
-with a stale clock; a DS3231 keeps time across power-off, but it still has to be
+with a stale clock; an RTC keeps time across power-off, but it still has to be
 *set* from a good reference at least once, and topped up so it does not drift.
 This script is that step. In the pipeline, clock error is a longitude error
 (~0.25 nmi per second), so getting to sub-second before a run matters.
@@ -16,7 +16,7 @@ Order of preference for the time reference:
   2. NTP  -- if no GPS is available but the system clock is already NTP-synced
      (timedatectl reports NTPSynchronized=yes), trust it as-is.
 
-Either way it then writes the disciplined system time into the DS3231 with
+Either way it then writes the disciplined system time into the RTC with
 `hwclock -w`, so the next cold, network-less boot starts accurate.
 
 Typical use (needs root to set the clock and write the RTC):
@@ -106,12 +106,12 @@ def step_system_clock(target_unix):
 
 
 def write_rtc():
-    """System clock -> DS3231 (hwclock -w). Needs root and a bound RTC."""
+    """System clock -> RTC (hwclock -w). Needs root and a bound RTC."""
     subprocess.run(["hwclock", "-w"], check=True, capture_output=True, text=True)
 
 
 def read_rtc():
-    """DS3231 -> printable string (hwclock -r), or an error note."""
+    """RTC -> printable string (hwclock -r), or an error note."""
     try:
         out = subprocess.run(["hwclock", "-r"], check=True,
                              capture_output=True, text=True, timeout=5)
@@ -175,7 +175,7 @@ def main():
         print("\n--dry-run: nothing changed. Would have set the system clock "
               f"from {source.upper()} and "
               + ("skipped the RTC write." if args.no_rtc_write
-                 else "written it to the DS3231."))
+                 else "written it to the RTC."))
         return
 
     try:
@@ -186,7 +186,7 @@ def main():
             print("System clock left as NTP had it.")
         if not args.no_rtc_write:
             write_rtc()
-            print(f"RTC written. DS3231 now reads: {read_rtc()}")
+            print(f"RTC written. RTC now reads: {read_rtc()}")
     except subprocess.CalledProcessError as e:
         err = (e.stderr or "").strip()
         if "not permitted" in err.lower() or "must be superuser" in err.lower():

@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """Build the tetra3/cedar-solve pattern database -- runs on the laptop.
 
-The repo already ships data/database_1.npz for the reference camera
-(IMX708 wide, 68.3 deg FOV). Rebuild only for another lens/camera. Defaults
-reproduce the shipped database: Hipparcos catalog, 68.315 deg FOV, magnitude
-6.5, pattern_max_error 0.005, 22 pattern stars and 75 verification stars per
-FOV.
+Builds the database for YOUR camera's field of view (--max-fov, the
+horizontal FOV in degrees; slightly larger than the real one is fine). The
+other defaults (magnitude 6.5, pattern_max_error 0.005, 22 pattern stars and
+75 verification stars per FOV) are the reference build's; its database is
+examples/reference-build/database.npz (68.315 deg).
 
-Output is  data/database_1.npz  next to this script (--save-as to change).
+Output is  data/database.npz  next to this script (--save-as to change).
 Takes a few minutes. Needs cedar-solve installed (import tetra3) and the
 Hipparcos main catalog file hip_main.dat (see the README).
 
 Usage:
-    python build_database.py --catalog hip_main.dat               # the shipped recipe
+    python build_database.py --catalog hip_main.dat --max-fov 68.3
     python build_database.py --catalog hip_main.dat --max-fov 50 --save-as data/fov50.npz
 """
 
@@ -25,8 +25,8 @@ from pathlib import Path
 def main():
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--max-fov", type=float, default=68.315,
-                        help="camera FOV in degrees (default: 68.315)")
+    parser.add_argument("--max-fov", type=float, required=True,
+                        help="camera horizontal FOV in degrees")
     parser.add_argument("--max-magnitude", type=float, default=6.5,
                         help="faintest stars to include (default: 6.5)")
     parser.add_argument("--pattern-max-error", type=float, default=0.005)
@@ -36,10 +36,10 @@ def main():
     parser.add_argument("--catalog", required=True,
                         help="path to hip_main.dat (or tyc_main.dat)")
     parser.add_argument("--save-as", default=None,
-                        help="output .npz path (default: data/database_1.npz next to this script)")
+                        help="output .npz path (default: data/database.npz next to this script)")
     args = parser.parse_args()
 
-    save_as = Path(args.save_as) if args.save_as else Path(__file__).parent / "data" / "database_1.npz"
+    save_as = Path(args.save_as) if args.save_as else Path(__file__).parent / "data" / "database.npz"
     save_as.parent.mkdir(parents=True, exist_ok=True)
 
     from tetra3 import Tetra3

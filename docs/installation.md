@@ -60,9 +60,10 @@ use another path.
   the end of the trimmed list. The reference instrument ran without it with
   no such crash seen in 46,000 frames, so it is a protection only.
 
-The star pattern database for the reference camera is included:
-`data/database_1.npz` (Hipparcos catalog, 68.3° field of view, magnitude 6.5).
-For another lens, see [Other cameras and IMUs](other-sensors.md).
+The star pattern database must match your camera's field of view. The
+reference build's database is included: `examples/reference-build/database.npz`
+(Hipparcos catalog, 68.3° field of view, magnitude 6.5). For another camera or
+lens, build one with `build_database.py` (see [Other cameras and IMUs](other-sensors.md)).
 
 The versions used in October 2026: cedar-solve 0.5.1 (commit `191b8f6`);
 cedar-detect built from its repository in May 2026 (exact commit not

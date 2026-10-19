@@ -6,7 +6,8 @@
 |---|---|---|
 | `capture_run_wave.py` | Pi | camera + IMU + fixes, writes the run folder |
 | `solve_worker.py` | Pi | star detection and solving, serves the capture over a Unix socket |
-| `imu_backends.py` | Pi | ISM330DHCX driver |
+| `imu_backends.py` | Pi | loads the IMU driver named in `configs/instrument.json` |
+| `imu_drivers/` | Pi | one driver per IMU (`ism330dhcx.py`, `template.py`) |
 | `webui/server.py` | Pi | web interface and process control |
 | `set_clock_from_gps.py` | Pi | sets the system clock and the RTC from a serial GPS |
 | `fit_mcase.py` | laptop | calibration step 1 (mounting rotation) |

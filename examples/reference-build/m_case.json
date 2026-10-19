@@ -1,0 +1,20 @@
+{
+  "M_case": [
+    [
+      0.075219,
+      -0.918529,
+      -0.388133
+    ],
+    [
+      -0.996835,
+      -0.079315,
+      -0.005482
+    ],
+    [
+      -0.02575,
+      0.387317,
+      -0.921587
+    ]
+  ],
+  "note": "reference build: camera ~23 deg off the IMU's -Y axis, measured with fit_mcase.py from star solves at two tilts"
+}

@@ -1,0 +1,32 @@
+{
+  "A": [
+    [
+      1.0072856508707122,
+      0.059748454131014275,
+      -0.043720833157501145
+    ],
+    [
+      -0.05939836997807188,
+      0.9959834794563224,
+      0.042218722656794126
+    ],
+    [
+      0.03382486087083019,
+      -0.04021458441756336,
+      0.999378077608666
+    ]
+  ],
+  "b": [
+    -0.00021590667467313865,
+    0.029984057748929382,
+    0.1165179809679757
+  ],
+  "c": [
+    0.001954053066418541,
+    0.0014858946990546813,
+    0.004221884969361401
+  ],
+  "temp_ref_c": 25.0,
+  "model": "true_up = normalize(A @ (M_case @ gravity) + b + c * (T - temp_ref_c)); fix in CIRS",
+  "note": "reference build: 9-orientation affine fit at a berth, temperature term, then re-zeroed on two sea nights with the ship's GPS track (rezero_deg 0.09). Example only: every instrument needs its own calibration."
+}
