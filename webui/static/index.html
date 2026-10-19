@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>PiSextant</title>
 <link rel="stylesheet" href="/static/vendor/leaflet.css">
 <link rel="stylesheet" href="/static/style.css">
@@ -10,104 +10,136 @@
 <body>
 <header>
   <h1>PiSextant</h1>
-  <span class="chip" id="chip-run">run: —</span>
-  <span class="chip" id="chip-solver">solver: off</span>
-  <span class="chip" id="chip-capture">capture: off</span>
-  <span class="chip" id="chip-ntp">clock: ?</span>
-  <span class="chip" id="chip-disk">disk: ?</span>
-  <span class="chip" id="chip-temp">temp: ?</span>
+  <nav class="tabs">
+    <button data-go="pos"><span class="ic">⌖</span><span class="tx">Position</span></button>
+    <button data-go="run"><span class="ic">▶</span><span class="tx">Run</span></button>
+    <button data-go="sens"><span class="ic">◔</span><span class="tx">Sensors</span></button>
+    <button data-go="truth"><span class="ic">⚑</span><span class="tx">Truth &amp; runs</span></button>
+    <button data-go="set"><span class="ic">⚙</span><span class="tx">Settings</span></button>
+  </nav>
+  <button id="btn-night" class="btn ghost sm" title="night mode">◐ night</button>
 </header>
 
 <main>
-  <section id="map-pane">
-    <div id="map"></div>
-    <div id="map-buttons">
-      <button onclick="dlKml('gps')">KML: GPS</button>
-      <button onclick="dlKml('smoothed')">KML: smoothed</button>
-      <button onclick="dlKml('fixes')">KML: fixes</button>
-      <label><input type="checkbox" id="follow" checked> follow</label>
-    </div>
-  </section>
-
-  <section id="side">
-    <div class="panel">
-      <h2>Processes</h2>
-      <div class="row">
-        <button id="btn-solver" onclick="toggleProc('solver')">start solver</button>
-        <select id="solver-config">
-          <option value="configs/optimized.json">optimized</option>
-          <option value="configs/default.json">default</option>
-        </select>
-      </div>
-      <div class="row">
-        <button id="btn-capture" onclick="toggleProc('capture')">start capture</button>
-        <label>duration <input id="cap-min" type="number" min="1" value="30" style="width:4em"> min</label>
-        <label>save 1 image in <input id="cap-png" type="number" min="1" value="30" style="width:4em"></label>
-      </div>
-      <pre id="proc-log"></pre>
-    </div>
-
-    <div class="panel">
-      <h2>Session checklist</h2>
-      <div id="checklist" class="hint">no active run</div>
-    </div>
-
-    <div class="panel">
-      <h2>Live fix</h2>
-      <div id="fix-info">no fix yet</div>
-      <div id="err-info"></div>
-      <pre id="solve-feed"></pre>
-    </div>
-
-    <div class="panel">
-      <h2>IMU</h2>
-      <div class="hint">gravity (m/s², last 60 s)</div>
-      <canvas id="grav-chart" width="360" height="120"></canvas>
-      <div id="grav-info"></div>
-      <div class="hint">temperature (°C, whole run)</div>
-      <canvas id="temp-chart" width="360" height="80"></canvas>
-    </div>
-
-    <div class="panel">
-      <h2>Truth (reference position)</h2>
-      <div class="row">
-        <input id="pos-lat" placeholder="lat (dec deg)" style="width:8em">
-        <input id="pos-lon" placeholder="lon (dec deg)" style="width:8em">
-        <button onclick="setPosition()">set</button>
-        <button onclick="clearPosition()">clear</button>
-      </div>
-      <div id="pos-info" class="hint">no fixed position</div>
-      <div class="hint">or GPS from the laptop:
-        <code>python nmea_logger.py --port /dev/ttyUSB0 --forward http://&lt;pi&gt;:8080</code></div>
-      <div id="gps-info">no GPS yet</div>
-    </div>
-
-    <div class="panel">
-      <h2>Runs</h2>
-      <div class="row">
-        <select id="run-select"></select>
-        <button onclick="watchRun()">load</button>
-        <button onclick="watchLatest()">follow latest</button>
+<!-- POSITION -->
+<section data-page="pos">
+  <div class="grid">
+    <div class="card">
+      <div class="poslabel">Position · 60 s average</div>
+      <div class="poslat" id="pos-lat-txt">—</div>
+      <div class="poslon" id="pos-lon-txt">—</div>
+      <div class="posmeta"><span class="badge" id="quality">no fix</span> <span id="fix-info">waiting for fixes</span></div>
+      <div class="posmeta" id="err-info"></div>
+      <div class="tiles">
+        <div class="tile"><div class="k">Error vs reference</div><div class="v" id="t-err">—</div></div>
+        <div class="tile"><div class="k">Fixes in window</div><div class="v" id="t-n">—</div></div>
+        <div class="tile"><div class="k">Solve rate</div><div class="v" id="t-rate">—</div></div>
+        <div class="tile"><div class="k">IMU temp</div><div class="v" id="chip-temp">—</div></div>
+        <div class="tile"><div class="k">Clock</div><div class="v" id="chip-ntp">—</div></div>
+        <div class="tile"><div class="k">Run</div><div class="v small" id="chip-run">—</div></div>
       </div>
     </div>
-
-    <div class="panel">
-      <h2>Offline map tiles</h2>
-      <div class="row">
-        <label>zoom <input id="tile-zmin" type="number" value="3" style="width:3em">
-        – <input id="tile-zmax" type="number" value="10" style="width:3em"></label>
-        <button onclick="tileEstimate()">estimate (current view)</button>
-        <button onclick="tileDownload()">download</button>
-        <button onclick="tilePurge()">purge blocked</button>
-      </div>
-      <div id="tile-status"></div>
-      <div class="hint">world base: zoom out fully, zoom 0–6. Detail: frame your
-        area, zoom 7–12 max. Tiles cache on the Pi and work offline afterwards.
-        403 blocked? Marine/shared IPs are often blocked by OSM — put a free
-        MapTiler/Stadia key URL in <code>webui_config.json</code> (notes
-        inside).</div>
+    <div class="card mapcard">
+      <div id="map"></div>
+      <label class="follow"><input type="checkbox" id="follow" checked> follow</label>
     </div>
-  </section>
+  </div>
+</section>
+
+<!-- RUN -->
+<section data-page="run">
+  <div class="cols">
+    <div class="card">
+      <h3>Run control</h3>
+      <div class="ctlrow"><span class="lbl">Solver</span><span class="badge" id="chip-solver">off</span>
+        <button id="btn-solver" class="btn" onclick="toggleProc('solver')">start solver</button></div>
+      <div class="ctlrow"><span class="lbl">Capture</span><span class="badge" id="chip-capture">off</span>
+        <button id="btn-capture" class="btn primary" onclick="toggleProc('capture')">start capture</button></div>
+      <div class="form">
+        <label>Duration <input id="cap-min" type="number" min="1" value="240"> min</label>
+        <label>Save 1 image in <input id="cap-png" type="number" min="1" value="30"></label>
+        <label>Solver config <input id="solver-config" value="configs/solver.json" class="wide-in"></label>
+      </div>
+      <p class="sub">Start the solver first and wait ~30 s. Stopping a capture can take up to 90 s (the run is finalized).</p>
+    </div>
+    <div class="card">
+      <h3>Checklist</h3>
+      <div id="checklist" class="sub">no active run</div>
+    </div>
+  </div>
+  <div class="card"><h3>Log</h3><pre class="log" id="proc-log"></pre><pre class="log" id="solve-feed"></pre></div>
+</section>
+
+<!-- SENSORS -->
+<section data-page="sens">
+  <div class="stats">
+    <div class="stat"><div class="k">Disk free</div><div class="v" id="chip-disk">—</div></div>
+    <div class="stat"><div class="k">Gravity |g|</div><div class="v" id="g-norm">—</div></div>
+    <div class="stat"><div class="k">Last frame</div><div class="v" id="last-frame">—</div></div>
+  </div>
+  <div class="card">
+    <h3>Gravity, last 60 s <span class="sub">x · y · z (m/s²)</span></h3>
+    <canvas id="grav-chart" width="900" height="160"></canvas>
+    <div class="sub" id="grav-info"></div>
+  </div>
+  <div class="card">
+    <h3>IMU temperature, whole run</h3>
+    <canvas id="temp-chart" width="900" height="110"></canvas>
+  </div>
+</section>
+
+<!-- TRUTH & RUNS -->
+<section data-page="truth">
+  <div class="cols">
+    <div class="card">
+      <h3>Reference position <span class="sub">to measure the error</span></h3>
+      <div class="form">
+        <label>Lat <input id="pos-lat" placeholder="48.8566"></label>
+        <label>Lon <input id="pos-lon" placeholder="2.3522"></label>
+      </div>
+      <div class="ctlrow"><button class="btn primary" onclick="setPosition()">Set</button>
+        <button class="btn ghost" onclick="clearPosition()">Clear</button></div>
+      <div id="pos-info" class="sub">no fixed position</div>
+      <p class="sub">Or forward a GPS from a laptop:
+        <code>python nmea_logger.py --port /dev/ttyUSB0 --forward http://&lt;pi&gt;:8080</code></p>
+      <div id="gps-info" class="sub">no GPS yet</div>
+    </div>
+    <div class="card">
+      <h3>Runs</h3>
+      <div class="form"><select id="run-select"></select></div>
+      <div class="ctlrow"><button class="btn" onclick="watchRun()">Load</button>
+        <button class="btn ghost" onclick="watchLatest()">Follow latest</button></div>
+      <h3 style="margin-top:14px">Export (KML)</h3>
+      <div class="ctlrow"><button class="btn ghost" onclick="dlKml('smoothed')">Track</button>
+        <button class="btn ghost" onclick="dlKml('fixes')">Fixes</button>
+        <button class="btn ghost" onclick="dlKml('gps')">GPS</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- SETTINGS -->
+<section data-page="set">
+  <div class="cols">
+    <div class="card">
+      <h3>Offline map tiles</h3>
+      <p class="sub">Frame the area on the Position map first, then come back here. World base: zoom 0–6; detail: 7–12.</p>
+      <div class="form">
+        <label>Zoom from <input id="tile-zmin" type="number" value="3"></label>
+        <label>to <input id="tile-zmax" type="number" value="10"></label>
+      </div>
+      <div class="ctlrow"><button class="btn ghost" onclick="tileEstimate()">Estimate</button>
+        <button class="btn primary" onclick="tileDownload()">Download</button>
+        <button class="btn ghost" onclick="tilePurge()">Purge blocked</button></div>
+      <div id="tile-status" class="sub"></div>
+      <p class="sub">403 errors? Shared marine IPs are often blocked by OpenStreetMap: put a MapTiler or Stadia URL in <code>webui/webui_config.json</code>.</p>
+    </div>
+    <div class="card">
+      <h3>Display</h3>
+      <div class="ctlrow"><span class="lbl">Night mode</span><button class="btn" onclick="toggleNight()">switch</button></div>
+      <p class="sub">Red on black, to keep night vision. The choice is saved in this browser.</p>
+    </div>
+  </div>
+</section>
 </main>
 <script src="/static/vendor/leaflet.js"></script>
 <script src="/static/app.js"></script>
