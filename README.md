@@ -97,6 +97,12 @@ sudo systemctl enable --now pisextant-webui
 
 ## Get started
 
+**Setup assistant:** `~/pisextant-hw/bin/python setup_pisextant.py` guides you
+through the checks, the I²C scan, the IMU driver, the camera, the star
+database, a first solve and the calibration runs. It records the runs on the
+Pi; the calibration fits then run on a laptop (it prints the commands).
+
+
 1. Open `http://<pi-address>:8080` in a browser on the same network (for
    example a phone hotspot).
 2. Put the instrument under a clear sky and wait about 10 minutes: the

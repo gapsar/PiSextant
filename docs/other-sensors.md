@@ -40,6 +40,7 @@ python build_database.py --catalog hip_main.dat --max-fov 50.0     # -> data/dat
 The field of view is `2 * atan(sensor width in mm / (2 * focal length in mm))`.
 For the reference camera: 4608 px × 1.4 µm = 6.45 mm, focal length 4.74 mm,
 so 68.5° (the solver measures 68.2°). `build_database.py` needs the Hipparcos
-main catalog file `hip_main.dat` (from ESA or CDS) and cedar-solve. In
+main catalog file `hip_main.dat` (~51 MB, from CDS:
+<https://cdsarc.cds.unistra.fr/ftp/cats/I/239/hip_main.dat>) and cedar-solve. In
 `configs/solver.json`, set `database.path` to the new file and
 `solve.fov_estimate` to the field of view.
