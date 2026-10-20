@@ -24,6 +24,7 @@ longitude.
 | Path | Role |
 |---|---|
 | `capture_run_wave.py` | Pi, capture venv: camera + IMU + fixes, writes `runs/<id>/` |
+| `wave_learner.py` | online wave filter used by the capture (logged only: `fix_wave`) |
 | `solve_worker.py` | Pi, solver venv: star detection + solving, Unix socket `/tmp/pisextant_solver.sock` |
 | `imu_backends.py`, `imu_drivers/` | IMU driver loader and one driver per sensor |
 | `webui/server.py` | Pi, system python3 (stdlib only): web page on port 8080, starts/stops the two processes |
@@ -32,6 +33,7 @@ longitude.
 | `fit_mcase.py`, `calibrate_affine.py`, `rezero.py` | calibration (laptop) |
 | `calibrate_rcal.py` | shared helpers (zenith model, solve-log reading, rotation fit) |
 | `sea_eval.py`, `drift_check.py`, `multiheading_fix.py` | evaluation (laptop) |
+| `wave_learner_replay.py`, `lever_arm_test.py` | wave filter replay on logged runs; lever-arm test (laptop) |
 | `replay_solve.py`, `build_database.py` | re-solve saved images; build a star database |
 | `nmea_logger.py`, `set_clock_from_gps.py` | GPS truth logging; clock setting |
 | `patches/` | two patches for cedar-solve (apply both) |
@@ -139,6 +141,8 @@ Calibration runs must use `--wave-s 0` (the default).
 - `runs/<id>/solves/live-<config>.jsonl`: first line `type: meta`, then per
   frame `status`, `centroids`, `solution` (RA, Dec, Roll, FOV, Matches,
   RMSE), `gravity_used`, `imu_temp_c`, `fix`, `fix_smoothed`
-  (`n_fixes`, `n_rejected`).
+  (`n_fixes`, `n_rejected`); since v2.2 also `fix_wave`, `fix_wave_smoothed`
+  and `wave_learner` (`active`, `models`, `n_train`, `error`) -- logged
+  only, the fix does not use them.
 - `runs/<id>/run_meta.json`: camera, IMU, calibration, solver config, clock
   state, end-of-run totals.

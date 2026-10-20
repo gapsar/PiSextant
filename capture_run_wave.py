@@ -20,6 +20,11 @@ Main features:
    logged per frame whenever --wave-s > 0.
 
 3. Temperature log: temp.jsonl, one record every ~5 s (degrees C).
+4. Online wave learner (wave_learner.py), LOGGED ONLY: it learns during the
+   run how the past gyro predicts the false tilt that wave acceleration
+   puts into the gravity vector, and logs a second fix per frame
+   ("fix_wave", "fix_wave_smoothed") once it has ~20 min of frames.
+   "fix" and "fix_smoothed" do not use it.
 
 Logs, per run folder: run_meta.json, images/, imu.jsonl (t, gravity = raw
 accel, gyro), temp.jsonl, capture.jsonl, solves/live-<config>.jsonl. The
@@ -58,8 +63,9 @@ from astropy.time import Time
 from picamera2 import Picamera2
 
 import imu_backends
+import wave_learner
 
-VERSION = "2.1"   # sensors and mounting from configs/ (2026-10-20)
+VERSION = "2.2"   # online wave learner, logged only (2026-10-21)
 
 REPO_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR = os.path.join(REPO_DIR, "configs")
@@ -255,16 +261,27 @@ def calculate_fix(ra_deg, dec_deg, roll_deg, gravity_xyz, obs_time, m_case,
     gravity vector (IMU, rotated into the camera frame) give the zenith in
     ICRS; rotated to CIRS (precession-nutation) it gives the latitude, and via
     the Earth rotation angle, the longitude."""
-    era_deg = obs_time.earth_rotation_angle("tio").deg
+    v_cam = calibrated_up(gravity_xyz, m_case, cal_a, cal_b, cal_c, temp_c,
+                          temp_ref_c)
+    return fix_from_up(attitude_matrix(ra_deg, dec_deg, roll_deg), v_cam,
+                       obs_time)
 
+
+def calibrated_up(gravity_xyz, m_case, cal_a, cal_b, cal_c=None, temp_c=None,
+                  temp_ref_c=25.0):
+    """Measured up direction in the camera frame (unit vector)."""
     v = cal_a @ (m_case @ np.asarray(gravity_xyz, dtype=float)) + cal_b
     if cal_c is not None and temp_c is not None:     # sensor offset vs temperature
         v = v + cal_c * (temp_c - temp_ref_c)
     norm = np.linalg.norm(v)
     if norm < 1e-6:
         raise ValueError("gravity vector magnitude too close to zero")
-    v_cam = v / norm
+    return v / norm
 
+
+def attitude_matrix(ra_deg, dec_deg, roll_deg):
+    """ICRS -> camera rotation from the star solve: rows are boresight,
+    roll-rotated east, roll-rotated north."""
     ra, dec, roll = np.radians([ra_deg, dec_deg, roll_deg])
     cos_ra, sin_ra = np.cos(ra), np.sin(ra)
     cos_dec, sin_dec = np.cos(dec), np.sin(dec)
@@ -274,9 +291,25 @@ def calculate_fix(ra_deg, dec_deg, roll_deg, gravity_xyz, obs_time, m_case,
     east = np.array([-sin_ra, cos_ra, 0.0])
     north = np.array([-sin_dec * cos_ra, -sin_dec * sin_ra, cos_dec])
 
-    r_icrs_to_cam = np.array([boresight,
-                              cos_roll * east + sin_roll * north,
-                              -sin_roll * east + cos_roll * north])
+    return np.array([boresight,
+                     cos_roll * east + sin_roll * north,
+                     -sin_roll * east + cos_roll * north])
+
+
+def cam_from_earth(r_icrs_to_cam, obs_time):
+    """Earth-fixed -> camera rotation (for the wave learner's Earth-fixed
+    zenith): Earth-fixed -> CIRS by the Earth rotation angle, CIRS -> ICRS,
+    ICRS -> camera."""
+    era = np.radians(obs_time.earth_rotation_angle("tio").deg)
+    c, s = np.cos(era), np.sin(era)
+    rot_era = np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
+    return r_icrs_to_cam @ icrs_to_cirs_matrix(obs_time).T @ rot_era
+
+
+def fix_from_up(r_icrs_to_cam, v_cam, obs_time):
+    """Latitude and longitude from the camera attitude and the camera-frame
+    up vector."""
+    era_deg = obs_time.earth_rotation_angle("tio").deg
     zenith_icrs = r_icrs_to_cam.T @ v_cam
     zenith = icrs_to_cirs_matrix(obs_time) @ zenith_icrs     # equator of date
 
@@ -335,6 +368,7 @@ class ImuLogger:
         self._gyro_q = np.array([0.0, 0.0, 0.0, 1.0])   # body -> gyro ref
         self._gyro_prev = None                          # (t, omega) last sample
         self.gyro_samples = 0
+        self._wave_feats = wave_learner.GyroFeatures()   # camera-frame gyro
         self.file = open(jsonl_path, "a")
         self.history = deque(maxlen=max(1000, int(wave_s * 120) + 200))
         self.lock = threading.Lock()
@@ -394,6 +428,7 @@ class ImuLogger:
             gg = quat_rotate(self._gyro_q, g)
             with self.lock:
                 self.history.append((t, g, self._gyro_q, gg))
+                self._wave_feats.add(t, M_CASE @ w)
             self.file.write(json.dumps({
                 "t": round(t, 4),
                 "gravity": [round(v, 5) for v in gravity],
@@ -424,6 +459,11 @@ class ImuLogger:
         mean_ref = np.mean([gg for t, gg, gq in window], axis=0)
         gq_nearest = window[int(np.argmin(np.abs(times - t_mid)))][2]
         return quat_rotate(gq_nearest, mean_ref, inverse=True)
+
+    def wave_features(self, t):
+        """Wave learner features at time t (past gyro only), or None."""
+        with self.lock:
+            return self._wave_feats.features(t)
 
     def close(self):
         self.stop_event.set()
@@ -594,6 +634,13 @@ def main():
                       "those > gate_deg from the window median (false solves) "
                       "(fix_smoothed per frame; the navigation output)",
         },
+        "wave_learner": {
+            "status": "logged only (fix_wave, fix_wave_smoothed per frame); "
+                      "fix and fix_smoothed do not use it",
+            "params": {k: getattr(wave_learner, k) for k in (
+                "BIN_S", "N_BINS", "BIAS_S", "TRAIN_S", "RETRAIN_S", "HP_S",
+                "MIN_TRAIN", "RIDGE")},
+        },
         "M_case": M_CASE.tolist(),
         "M_case_source": M_CASE_SOURCE,
         "R_cal": CAL_A.tolist(),
@@ -628,6 +675,8 @@ def main():
     wave_fallbacks = 0
     cycle_times = []
     fix_history = deque()   # (t_exp_mid, lat, lon) for the smoothed fix
+    wave_filter = wave_learner.OnlineTiltFilter()
+    fix_wave_history = deque()   # same, for the wave learner's fixes
     t_run_end = time.time() + args.duration_min * 60
 
     # Pipeline: frame N+1 exposes while frame N is saved/solved/logged.
@@ -691,16 +740,37 @@ def main():
             # Fix
             fix, fix_error = None, None
             t_fix_ms = 0.0
+            temp_c = imu.last_temp      # read once: the IMU thread updates it
             if solved and gravity is not None:
                 t0 = time.perf_counter()
                 try:
-                    fix = calculate_fix(solution["RA"], solution["Dec"],
-                                        solution["Roll"], gravity, obs_time,
-                                        M_CASE, CAL_A, CAL_B, CAL_C,
-                                        imu.last_temp, CAL_T0)
+                    v_cam = calibrated_up(gravity, M_CASE, CAL_A, CAL_B, CAL_C,
+                                          temp_c, CAL_T0)
+                    r_att = attitude_matrix(solution["RA"], solution["Dec"],
+                                            solution["Roll"])
+                    fix = fix_from_up(r_att, v_cam, obs_time)
                 except Exception as e:
                     fix_error = str(e)
                 t_fix_ms = (time.perf_counter() - t0) * 1000
+
+            # Wave learner (logged only): learns live how the past gyro
+            # predicts the false tilt and gives a second, corrected fix
+            fix_wave, fix_wave_smooth, wave_error = None, None, None
+            if fix is not None:
+                try:
+                    up_corr = wave_filter.add_frame(
+                        t_exp_mid, imu.wave_features(t_exp_mid), v_cam,
+                        cam_from_earth(r_att, obs_time))
+                    if up_corr is not None:
+                        fix_wave = fix_from_up(r_att, up_corr, obs_time)
+                except Exception as e:
+                    wave_error = str(e)
+            if fix_wave is not None and args.smooth_s > 0:
+                fix_wave_history.append((t_exp_mid, fix_wave["latitude"],
+                                         fix_wave["longitude"]))
+                while fix_wave_history[0][0] < t_exp_mid - args.smooth_s:
+                    fix_wave_history.popleft()
+                fix_wave_smooth = smoothed_fix(fix_wave_history, args.smooth_s)
 
             # Smoothed fix: trailing mean of the instant fix positions
             fix_smooth = None
@@ -742,7 +812,7 @@ def main():
                 "centroids": response.get("centroids"),
                 "solution": solution,
                 "gravity_used": gravity,
-                "imu_temp_c": imu.last_temp,
+                "imu_temp_c": temp_c,
                 "gravity_median": gravity_median,
                 "gravity_wave_gyro": (gravity_wave.tolist()
                                       if gravity_wave is not None else None),
@@ -752,6 +822,12 @@ def main():
                 "fix": fix,
                 "fix_smoothed": fix_smooth,
                 "fix_error": fix_error,
+                "fix_wave": fix_wave,
+                "fix_wave_smoothed": fix_wave_smooth,
+                "wave_learner": {"active": fix_wave is not None,
+                                 "models": wave_filter.n_models,
+                                 "n_train": wave_filter.n_train,
+                                 "error": wave_error},
                 "timings_ms": {**response.get("timings", {}), **timings},
             }), default=str) + "\n")
             solve_log.flush()

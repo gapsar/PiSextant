@@ -59,9 +59,11 @@ def main():
         t_all.append(t)
         if not d.get("fix"):
             continue
+        wv = d.get("fix_wave_smoothed") or {}     # wave learner (v2.2+), logged only
         rows.append((t, d["fix"]["latitude"], d["fix"]["longitude"],
                      d["fix_smoothed"]["latitude"], d["fix_smoothed"]["longitude"],
-                     d.get("imu_temp_c") or np.nan))
+                     d.get("imu_temp_c") or np.nan,
+                     wv.get("latitude", np.nan), wv.get("longitude", np.nan)))
     a = np.array(rows)
     t_all = np.array(sorted(t_all))
     t = a[:, 0]
@@ -89,6 +91,13 @@ def main():
     print(f"one frame scatter (std): N {eN.std():.1f}  E {eE.std():.1f} nmi")
     print(f"60 s fix error: median {np.median(e):.2f}  p95 {np.percentile(e, 95):.2f}  "
           f"max {e.max():.2f} nmi")
+    wN, wE = (a[:, 6] - tl) * 60, (a[:, 7] - tn) * 60 * c
+    kw = k & ~np.isnan(wN)
+    if kw.sum() > 10:
+        es, ew = np.hypot(sN, sE)[kw], np.hypot(wN, wE)[kw]
+        print(f"wave learner (logged only), same {kw.sum()} frames: 60 s fix median "
+              f"{np.median(es):.2f} -> {np.median(ew):.2f}  p95 {np.percentile(es, 95):.2f} -> "
+              f"{np.percentile(ew, 95):.2f} nmi")
 
     B = args.bin_min
     print(f"\n  min   solved     N_err  E_err  |err|   temp  cam_az")
