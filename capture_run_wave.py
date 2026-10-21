@@ -65,7 +65,7 @@ from picamera2 import Picamera2
 import imu_backends
 import wave_learner
 
-VERSION = "2.2"   # online wave learner, logged only (2026-10-21)
+VERSION = "2.3"   # smoothed fix: at least 50 fixes, up to 180 s (2026-10-21)
 
 REPO_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR = os.path.join(REPO_DIR, "configs")
@@ -78,6 +78,8 @@ WAVE_DEFAULT_S = 0.0
 SMOOTH_WINDOW_S = 60.0  # trailing fix-position mean; wave-band error is gone
                         # (decorrelated by ~40 s at sea)
 SMOOTH_GATE_DEG = 5.0   # fixes this far from the window median are false solves
+SMOOTH_MIN_FIXES = 50   # fewer fixes in the window (clouds): take the last 50 ...
+SMOOTH_MAX_S = 180.0    # ... but none older than this
 
 TEMP_LOG_EVERY_S = 5.0             # one temp.jsonl record every ~5 s
 
@@ -321,28 +323,40 @@ def fix_from_up(r_icrs_to_cam, v_cam, obs_time):
             "lst_deg": float(lst_deg), "era_deg": float(era_deg)}
 
 
-def smoothed_fix(fix_history, window_s, gate_deg=SMOOTH_GATE_DEG):
+def smoothed_fix(fix_history, window_s, gate_deg=SMOOTH_GATE_DEG,
+                 min_fixes=SMOOTH_MIN_FIXES):
     """Trailing mean of the instant fix positions. The fused IMU tilt
     wobbles at the wave period (decorrelated by ~40 s) and the solver adds
     per-frame white noise; both average out here, leaving the calibration
     floor. Longitude is averaged wrap-safely around the first sample.
+
+    fix_history holds (t, lat, lon) of the last SMOOTH_MAX_S, newest last.
+    The mean uses the fixes of the last window_s; when clouds leave fewer
+    than min_fixes there, it uses the last min_fixes instead (the history
+    limits how old they can be): a mean of a few fixes keeps most of the
+    ~20 nmi single-fix scatter at sea.
 
     Fixes more than gate_deg from the window median are left out of the
     mean: a false star solve lands thousands of nmi away and would spoil
     the mean for a full window, while wave noise stays below ~2 deg."""
     if not fix_history:
         return None
-    lats = np.array([la for (t, la, lo) in fix_history])
-    ref = fix_history[0][2]
+    t_now = fix_history[-1][0]
+    window = [f for f in fix_history if f[0] >= t_now - window_s]
+    if len(window) < min_fixes:
+        window = list(fix_history)[-min_fixes:]
+    lats = np.array([la for (t, la, lo) in window])
+    ref = window[0][2]
     lons = np.array([((lo - ref + 180.0) % 360.0 - 180.0) + ref
-                     for (t, la, lo) in fix_history])
+                     for (t, la, lo) in window])
     mla, mlo = np.median(lats), np.median(lons)
     keep = np.hypot(lats - mla, (lons - mlo) * np.cos(np.radians(mla))) <= gate_deg
     return {"latitude": float(np.mean(lats[keep])),
             "longitude": float((np.mean(lons[keep]) + 180.0) % 360.0 - 180.0),
             "n_fixes": int(keep.sum()),
             "n_rejected": int((~keep).sum()),
-            "window_s": window_s}
+            "window_s": window_s,
+            "window_used_s": round(t_now - window[0][0], 1)}
 
 
 # --- IMU --------------------------------------------------------------------
@@ -630,9 +644,13 @@ def main():
         "smoothed_fix": {
             "window_s": args.smooth_s,
             "gate_deg": SMOOTH_GATE_DEG,
+            "min_fixes": SMOOTH_MIN_FIXES,
+            "max_s": SMOOTH_MAX_S,
             "method": "trailing mean of instant fix positions, without "
-                      "those > gate_deg from the window median (false solves) "
-                      "(fix_smoothed per frame; the navigation output)",
+                      "those > gate_deg from the window median (false solves); "
+                      "the last min_fixes (not older than max_s) when the "
+                      "window holds fewer (fix_smoothed per frame; the "
+                      "navigation output)",
         },
         "wave_learner": {
             "status": "logged only (fix_wave, fix_wave_smoothed per frame); "
@@ -768,7 +786,7 @@ def main():
             if fix_wave is not None and args.smooth_s > 0:
                 fix_wave_history.append((t_exp_mid, fix_wave["latitude"],
                                          fix_wave["longitude"]))
-                while fix_wave_history[0][0] < t_exp_mid - args.smooth_s:
+                while fix_wave_history[0][0] < t_exp_mid - max(args.smooth_s, SMOOTH_MAX_S):
                     fix_wave_history.popleft()
                 fix_wave_smooth = smoothed_fix(fix_wave_history, args.smooth_s)
 
@@ -777,7 +795,7 @@ def main():
             if fix is not None and args.smooth_s > 0:
                 fix_history.append((t_exp_mid, fix["latitude"],
                                     fix["longitude"]))
-                while fix_history[0][0] < t_exp_mid - args.smooth_s:
+                while fix_history[0][0] < t_exp_mid - max(args.smooth_s, SMOOTH_MAX_S):
                     fix_history.popleft()
                 fix_smooth = smoothed_fix(fix_history, args.smooth_s)
 
