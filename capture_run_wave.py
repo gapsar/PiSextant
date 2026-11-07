@@ -25,6 +25,11 @@ Main features:
    puts into the gravity vector, and logs a second fix per frame
    ("fix_wave", "fix_wave_smoothed") once it has ~20 min of frames.
    "fix" and "fix_smoothed" do not use it.
+5. Star-anchored IMU mean (star_imu_live.py), LOGGED ONLY: the 60 s up
+   vector from ALL IMU samples (attitude of each sample from the stars and
+   the gyro), not only from the exposures of the solved frames
+   ("fix_star_imu" per frame). At sea it was 17-55 % better than
+   fix_smoothed on the replayed nights.
 
 Logs, per run folder: run_meta.json, images/, imu.jsonl (t, gravity = raw
 accel, gyro), temp.jsonl, capture.jsonl, solves/live-<config>.jsonl. The
@@ -63,9 +68,10 @@ from astropy.time import Time
 from picamera2 import Picamera2
 
 import imu_backends
+import star_imu_live
 import wave_learner
 
-VERSION = "2.3"   # smoothed fix: at least 50 fixes, up to 180 s (2026-10-21)
+VERSION = "2.4"   # star-anchored IMU mean, logged only (2026-10-31)
 
 REPO_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR = os.path.join(REPO_DIR, "configs")
@@ -441,7 +447,7 @@ class ImuLogger:
             # this thread of IMU samples during the exposure)
             gg = quat_rotate(self._gyro_q, g)
             with self.lock:
-                self.history.append((t, g, self._gyro_q, gg))
+                self.history.append((t, g, self._gyro_q, gg, w))
                 self._wave_feats.add(t, M_CASE @ w)
             self.file.write(json.dumps({
                 "t": round(t, 4),
@@ -456,8 +462,13 @@ class ImuLogger:
 
     def gravity_window(self, t_start, t_end):
         with self.lock:
-            return [g for (t, g, gq, gg) in self.history
+            return [g for (t, g, gq, gg, w) in self.history
                     if t_start <= t <= t_end]
+
+    def samples_since(self, t0):
+        """(t, raw accel, raw gyro) of the samples after t0, time order."""
+        with self.lock:
+            return [(t, g, w) for (t, g, gq, gg, w) in self.history if t > t0]
 
     def wave_gravity(self, t_mid, window_s, min_samples=20):
         """Trailing de-rotated gravity average: every sample is carried to the
@@ -465,7 +476,7 @@ class ImuLogger:
         acceleration is near zero-mean over the window. Returns None until a
         full window of history exists."""
         with self.lock:
-            window = [(t, gg, gq) for (t, g, gq, gg) in self.history
+            window = [(t, gg, gq) for (t, g, gq, gg, w) in self.history
                       if t_mid - window_s <= t <= t_mid]
         if len(window) < min_samples or window[0][0] > t_mid - 0.9 * window_s:
             return None
@@ -659,6 +670,14 @@ def main():
                 "BIN_S", "N_BINS", "BIAS_S", "TRAIN_S", "RETRAIN_S", "HP_S",
                 "MIN_TRAIN", "RIDGE")},
         },
+        "star_imu_mean": {
+            "status": "logged only (fix_star_imu per frame); fix and "
+                      "fix_smoothed do not use it",
+            "window_s": args.smooth_s or SMOOTH_WINDOW_S,
+            "params": {k: getattr(star_imu_live.StarImuMean, k) for k in (
+                "MAX_GAP_S", "PAIR_GAP_S", "BIAS_WINDOW_S", "MAX_MISMATCH_DEG",
+                "GATE_DEG", "BIN_S", "MIN_COVER")},
+        },
         "M_case": M_CASE.tolist(),
         "M_case_source": M_CASE_SOURCE,
         "R_cal": CAL_A.tolist(),
@@ -695,6 +714,9 @@ def main():
     fix_history = deque()   # (t_exp_mid, lat, lon) for the smoothed fix
     wave_filter = wave_learner.OnlineTiltFilter()
     fix_wave_history = deque()   # same, for the wave learner's fixes
+    star_mean = star_imu_live.StarImuMean(M_CASE, CAL_A, CAL_B, CAL_C, CAL_T0,
+                                          window_s=args.smooth_s or SMOOTH_WINDOW_S)
+    star_errors = 0
     t_run_end = time.time() + args.duration_min * 60
 
     # Pipeline: frame N+1 exposes while frame N is saved/solved/logged.
@@ -799,10 +821,27 @@ def main():
                     fix_history.popleft()
                 fix_smooth = smoothed_fix(fix_history, args.smooth_s)
 
+            # Star-anchored IMU mean (logged only): all IMU samples, each
+            # carried to the Earth frame with the star + gyro attitude
+            fix_star, star_error = None, None
+            t0 = time.perf_counter()
+            try:
+                star_mean.add_imu(imu.samples_since(star_mean.t_last_sample))
+                if fix is not None:
+                    star_mean.add_solved_frame(
+                        t_exp_mid, r_att, fix["latitude"], fix["longitude"],
+                        fix["era_deg"], icrs_to_cirs_matrix(obs_time), temp_c)
+                fix_star = star_mean.fix(t_exp_mid)
+            except Exception as e:
+                star_error = str(e)
+                star_errors += 1
+            t_star_ms = (time.perf_counter() - t0) * 1000
+
             t_cycle_ms = (time.perf_counter() - t_cycle0) * 1000
             timings = {"capture_wait": round(t_wait_ms, 1),
                        "solve_roundtrip": round(t_solve_ms, 1),
                        "fix": round(t_fix_ms, 1),
+                       "star_imu": round(t_star_ms, 1),
                        "cycle": round(t_cycle_ms, 1)}
 
             capture_log.write(json.dumps(sanitize({
@@ -842,6 +881,8 @@ def main():
                 "fix_error": fix_error,
                 "fix_wave": fix_wave,
                 "fix_wave_smoothed": fix_wave_smooth,
+                "fix_star_imu": fix_star,
+                "star_imu_error": star_error,
                 "wave_learner": {"active": fix_wave is not None,
                                  "models": wave_filter.n_models,
                                  "n_train": wave_filter.n_train,
@@ -903,6 +944,9 @@ def main():
             "imu_read_errors": imu.errors,
             "gyro_samples_integrated": imu.gyro_samples,
             "temp_samples_logged": imu.temp_samples,
+            "star_imu_intervals": star_mean.n_intervals,
+            "star_imu_rejected": star_mean.n_rejected,
+            "star_imu_errors": star_errors,
             "cycle_ms_mean": round(float(np.mean(cycle_times)), 1) if cycle_times else None,
             "cycle_ms_median": round(float(np.median(cycle_times)), 1) if cycle_times else None,
         })

@@ -25,6 +25,7 @@ longitude.
 |---|---|
 | `capture_run_wave.py` | Pi, capture venv: camera + IMU + fixes, writes `runs/<id>/` |
 | `wave_learner.py` | online wave filter used by the capture (logged only: `fix_wave`) |
+| `star_imu_live.py` | star-anchored mean of all IMU samples used by the capture (logged only: `fix_star_imu`, v2.4) |
 | `solve_worker.py` | Pi, solver venv: star detection + solving, Unix socket `/tmp/pisextant_solver.sock` |
 | `imu_backends.py`, `imu_drivers/` | IMU driver loader and one driver per sensor |
 | `webui/server.py` | Pi, system python3 (stdlib only): web page on port 8080, starts/stops the two processes |
@@ -142,7 +143,8 @@ Calibration runs must use `--wave-s 0` (the default).
   frame `status`, `centroids`, `solution` (RA, Dec, Roll, FOV, Matches,
   RMSE), `gravity_used`, `imu_temp_c`, `fix`, `fix_smoothed`
   (`n_fixes`, `n_rejected`); since v2.2 also `fix_wave`, `fix_wave_smoothed`
-  and `wave_learner` (`active`, `models`, `n_train`, `error`) -- logged
-  only, the fix does not use them.
+  and `wave_learner` (`active`, `models`, `n_train`, `error`); since v2.4
+  also `fix_star_imu` (`coverage`, `gyro_offset_dps`) and `star_imu_error`
+  -- logged only, the fix does not use them.
 - `runs/<id>/run_meta.json`: camera, IMU, calibration, solver config, clock
   state, end-of-run totals.
