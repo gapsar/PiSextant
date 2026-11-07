@@ -60,10 +60,12 @@ def main():
         if not d.get("fix"):
             continue
         wv = d.get("fix_wave_smoothed") or {}     # wave learner (v2.2+), logged only
+        nv = d.get("fix_nav") or d.get("fix_star_imu") or {}   # v2.5 nav output (v2.4: star IMU)
         rows.append((t, d["fix"]["latitude"], d["fix"]["longitude"],
                      d["fix_smoothed"]["latitude"], d["fix_smoothed"]["longitude"],
                      d.get("imu_temp_c") or np.nan,
-                     wv.get("latitude", np.nan), wv.get("longitude", np.nan)))
+                     wv.get("latitude", np.nan), wv.get("longitude", np.nan),
+                     nv.get("latitude", np.nan), nv.get("longitude", np.nan)))
     a = np.array(rows)
     t_all = np.array(sorted(t_all))
     t = a[:, 0]
@@ -98,6 +100,17 @@ def main():
         print(f"wave learner (logged only), same {kw.sum()} frames: 60 s fix median "
               f"{np.median(es):.2f} -> {np.median(ew):.2f}  p95 {np.percentile(es, 95):.2f} -> "
               f"{np.percentile(ew, 95):.2f} nmi")
+
+    nN, nE = (a[:, 8] - tl) * 60, (a[:, 9] - tn) * 60 * c
+    kn = k & ~np.isnan(nN)
+    if kn.sum() > 10:
+        es, en = np.hypot(sN, sE)[kn], np.hypot(nN, nE)[kn]
+        rs = np.hypot(sN[kn] - np.median(sN[kn]), sE[kn] - np.median(sE[kn]))
+        rn = np.hypot(nN[kn] - np.median(nN[kn]), nE[kn] - np.median(nE[kn]))
+        print(f"fix_nav / star IMU vs fix_smoothed, same {kn.sum()} frames ({kn.sum() / k.sum():.0%}): "
+              f"error median {np.median(es):.2f} -> {np.median(en):.2f}  p95 {np.percentile(es, 95):.2f} -> "
+              f"{np.percentile(en, 95):.2f}; around the night offset rms {np.sqrt(np.mean(rs ** 2)):.2f} -> "
+              f"{np.sqrt(np.mean(rn ** 2)):.2f} nmi")
 
     B = args.bin_min
     print(f"\n  min   solved     N_err  E_err  |err|   temp  cam_az")

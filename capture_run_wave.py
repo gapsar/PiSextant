@@ -5,10 +5,11 @@ logs everything into a self-contained run folder.
 
 Main features:
 
-1. Smoothed fix. Each frame also gets "fix_smoothed", the trailing --smooth-s
-   (default 60 s) mean of the instant fixes: wave motion and solver noise
-   average out, leaving the calibration floor. It is the position to
-   navigate by.
+1. Navigation output "fix_nav" (v2.5): the star-anchored IMU mean
+   ("fix_star_imu", feature 5) when it exists, else "fix_smoothed"; its
+   "source" field says which ("star_imu" or "smoothed"). It is the position
+   to navigate by. "fix_smoothed" stays in the log: the trailing --smooth-s
+   (default 60 s) mean of the instant fixes.
 
 2. Optional wave compensation (--wave-s, OFF by default). Each fix then uses
    gravity averaged over a trailing window, every IMU sample carried to the
@@ -25,11 +26,12 @@ Main features:
    puts into the gravity vector, and logs a second fix per frame
    ("fix_wave", "fix_wave_smoothed") once it has ~20 min of frames.
    "fix" and "fix_smoothed" do not use it.
-5. Star-anchored IMU mean (star_imu_live.py), LOGGED ONLY: the 60 s up
-   vector from ALL IMU samples (attitude of each sample from the stars and
-   the gyro), not only from the exposures of the solved frames
-   ("fix_star_imu" per frame). At sea it was 17-55 % better than
-   fix_smoothed on the replayed nights.
+5. Star-anchored IMU mean (star_imu_live.py): the --nav-s (default 60 s,
+   NAV_WINDOW_S) up vector from ALL IMU samples (attitude of each sample
+   from the stars and the gyro), not only from the exposures of the solved
+   frames ("fix_star_imu" per frame). At sea it was 17-55 % better than
+   fix_smoothed on the replayed nights (docs/wave-work.md); 120 s
+   was ~20 % better again. Used by fix_nav since v2.5.
 
 Logs, per run folder: run_meta.json, images/, imu.jsonl (t, gravity = raw
 accel, gyro), temp.jsonl, capture.jsonl, solves/live-<config>.jsonl. The
@@ -71,7 +73,7 @@ import imu_backends
 import star_imu_live
 import wave_learner
 
-VERSION = "2.4"   # star-anchored IMU mean, logged only (2026-10-31)
+VERSION = "2.5"   # fix_nav = star-anchored IMU mean, fallback fix_smoothed (2026-11-08)
 
 REPO_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR = os.path.join(REPO_DIR, "configs")
@@ -81,6 +83,7 @@ SHM_DIR = "/dev/shm"
 # Wave compensation window. Default OFF: the gyro's zero-rate offset is not
 # corrected yet (see the docstring). Pass --wave-s 20 to try it.
 WAVE_DEFAULT_S = 0.0
+NAV_WINDOW_S = 60.0     # window of fix_star_imu = fix_nav (120 = smoother, 60 s more lag)
 SMOOTH_WINDOW_S = 60.0  # trailing fix-position mean; wave-band error is gone
                         # (decorrelated by ~40 s at sea)
 SMOOTH_GATE_DEG = 5.0   # fixes this far from the window median are false solves
@@ -329,6 +332,17 @@ def fix_from_up(r_icrs_to_cam, v_cam, obs_time):
             "lst_deg": float(lst_deg), "era_deg": float(era_deg)}
 
 
+def nav_fix(fix_star, fix_smooth):
+    """Navigation output: the star-anchored IMU mean when it exists (it
+    needs ~30 % of its window covered by IMU samples between solved
+    frames), else the smoothed fix; None when neither exists."""
+    if fix_star is not None:
+        return {**fix_star, "source": "star_imu"}
+    if fix_smooth is not None:
+        return {**fix_smooth, "source": "smoothed"}
+    return None
+
+
 def smoothed_fix(fix_history, window_s, gate_deg=SMOOTH_GATE_DEG,
                  min_fixes=SMOOTH_MIN_FIXES):
     """Trailing mean of the instant fix positions. The fused IMU tilt
@@ -538,6 +552,9 @@ def main():
     parser.add_argument("--smooth-s", type=float, default=SMOOTH_WINDOW_S,
                         help="trailing fix-position averaging window in "
                              "seconds (0 disables the smoothed fix)")
+    parser.add_argument("--nav-s", type=float, default=NAV_WINDOW_S,
+                        help="window of the star-anchored IMU mean = the "
+                             "navigation output fix_nav (default 60 s)")
     parser.add_argument("--png-every", type=int, default=10,
                         help="save 1 frame image in N (default 10; 1 = all). "
                              "All images cost ~125 MB per minute; they serve "
@@ -660,8 +677,8 @@ def main():
             "method": "trailing mean of instant fix positions, without "
                       "those > gate_deg from the window median (false solves); "
                       "the last min_fixes (not older than max_s) when the "
-                      "window holds fewer (fix_smoothed per frame; the "
-                      "navigation output)",
+                      "window holds fewer (fix_smoothed per frame; "
+                      "fallback of fix_nav)",
         },
         "wave_learner": {
             "status": "logged only (fix_wave, fix_wave_smoothed per frame); "
@@ -671,12 +688,17 @@ def main():
                 "MIN_TRAIN", "RIDGE")},
         },
         "star_imu_mean": {
-            "status": "logged only (fix_star_imu per frame); fix and "
-                      "fix_smoothed do not use it",
-            "window_s": args.smooth_s or SMOOTH_WINDOW_S,
+            "status": "fix_star_imu per frame = fix_nav when it exists",
+            "window_s": args.nav_s,
             "params": {k: getattr(star_imu_live.StarImuMean, k) for k in (
                 "MAX_GAP_S", "PAIR_GAP_S", "BIAS_WINDOW_S", "MAX_MISMATCH_DEG",
                 "GATE_DEG", "BIN_S", "MIN_COVER")},
+        },
+        "navigation_output": {
+            "field": "fix_nav",
+            "primary": "fix_star_imu",
+            "fallback": "fix_smoothed",
+            "window_s": args.nav_s,
         },
         "M_case": M_CASE.tolist(),
         "M_case_source": M_CASE_SOURCE,
@@ -715,7 +737,7 @@ def main():
     wave_filter = wave_learner.OnlineTiltFilter()
     fix_wave_history = deque()   # same, for the wave learner's fixes
     star_mean = star_imu_live.StarImuMean(M_CASE, CAL_A, CAL_B, CAL_C, CAL_T0,
-                                          window_s=args.smooth_s or SMOOTH_WINDOW_S)
+                                          window_s=args.nav_s)
     star_errors = 0
     t_run_end = time.time() + args.duration_min * 60
 
@@ -836,6 +858,7 @@ def main():
                 star_error = str(e)
                 star_errors += 1
             t_star_ms = (time.perf_counter() - t0) * 1000
+            fix_nav = nav_fix(fix_star, fix_smooth)
 
             t_cycle_ms = (time.perf_counter() - t_cycle0) * 1000
             timings = {"capture_wait": round(t_wait_ms, 1),
@@ -882,6 +905,7 @@ def main():
                 "fix_wave": fix_wave,
                 "fix_wave_smoothed": fix_wave_smooth,
                 "fix_star_imu": fix_star,
+                "fix_nav": fix_nav,
                 "star_imu_error": star_error,
                 "wave_learner": {"active": fix_wave is not None,
                                  "models": wave_filter.n_models,
@@ -897,10 +921,10 @@ def main():
             if fix is not None:
                 fixes_computed += 1
                 tag = "wave" if gravity_wave is not None else "med "
-                smooth_str = (f"  avg ({fix_smooth['latitude']:+.3f}, "
-                              f"{fix_smooth['longitude']:+.3f})"
-                              f"[{fix_smooth['n_fixes']}]"
-                              if fix_smooth else "")
+                smooth_str = (f"  nav ({fix_nav['latitude']:+.3f}, "
+                              f"{fix_nav['longitude']:+.3f})"
+                              f"[{fix_nav['source']}]"
+                              if fix_nav else "")
                 print(f"frame {frame_id:05d}  {response.get('n_centroids', 0):3d} cent  "
                       f"fix ({fix['latitude']:+.3f}, {fix['longitude']:+.3f}) {tag}"
                       f"{smooth_str}  "

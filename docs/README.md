@@ -10,5 +10,6 @@
 | [Checking a run](checking-a-run.md) | compare a run with a GPS track or known positions |
 | [Files and folders](reference.md) | every script, and the content of a run folder |
 | [Other cameras and IMUs](other-sensors.md) | what to change for other sensors |
+| [Wave work](wave-work.md) | what limits the fix at sea, the tests, and the v2.5 output |
 | [Known limits](limits.md) | error sources and how to handle them |
 | [Credits and licenses](credits.md) | third-party software and data |

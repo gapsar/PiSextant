@@ -14,8 +14,10 @@ from star images, with no GPS:
   in the camera frame;
 - attitude + zenith + exact time (UT1, precession-nutation) give the position.
 
-One frame gives one fix; the 60-second average of the fixes (`fix_smoothed`)
-is the navigation output. Scale: 1 arc minute of error in the vertical =
+One frame gives one fix. The navigation output is `fix_nav` (v2.5): the
+60-second star-anchored mean of all IMU samples (`fix_star_imu`), or the
+60-second average of the fixes (`fix_smoothed`) when that mean is not
+available; see docs/wave-work.md. Scale: 1 arc minute of error in the vertical =
 1 nautical mile (nmi) of position error; 1 s of clock error = 0.25 nmi of
 longitude.
 
@@ -25,7 +27,7 @@ longitude.
 |---|---|
 | `capture_run_wave.py` | Pi, capture venv: camera + IMU + fixes, writes `runs/<id>/` |
 | `wave_learner.py` | online wave filter used by the capture (logged only: `fix_wave`) |
-| `star_imu_live.py` | star-anchored mean of all IMU samples used by the capture (logged only: `fix_star_imu`, v2.4) |
+| `star_imu_live.py` | star-anchored mean of all IMU samples used by the capture: `fix_star_imu` (v2.4), the navigation output `fix_nav` since v2.5 |
 | `solve_worker.py` | Pi, solver venv: star detection + solving, Unix socket `/tmp/pisextant_solver.sock` |
 | `imu_backends.py`, `imu_drivers/` | IMU driver loader and one driver per sensor |
 | `webui/server.py` | Pi, system python3 (stdlib only): web page on port 8080, starts/stops the two processes |
@@ -144,7 +146,9 @@ Calibration runs must use `--wave-s 0` (the default).
   RMSE), `gravity_used`, `imu_temp_c`, `fix`, `fix_smoothed`
   (`n_fixes`, `n_rejected`); since v2.2 also `fix_wave`, `fix_wave_smoothed`
   and `wave_learner` (`active`, `models`, `n_train`, `error`); since v2.4
-  also `fix_star_imu` (`coverage`, `gyro_offset_dps`) and `star_imu_error`
+  also `fix_star_imu` (`coverage`, `gyro_offset_dps`) and `star_imu_error`;
+  since v2.5 also `fix_nav` (= `fix_star_imu` or `fix_smoothed`, field
+  `source`), the navigation output
   -- logged only, the fix does not use them.
 - `runs/<id>/run_meta.json`: camera, IMU, calibration, solver config, clock
   state, end-of-run totals.

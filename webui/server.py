@@ -305,7 +305,8 @@ class RunTailer(threading.Thread):
             return
         t = None
         fix = rec.get("fix")
-        sm = rec.get("fix_smoothed")
+        # navigation output: fix_nav (capture v2.5+), else fix_smoothed
+        sm = rec.get("fix_nav") or rec.get("fix_smoothed")
         if fix:
             STATE.fixes.append((rec.get("time_iso_mid"),
                                 fix["latitude"], fix["longitude"]))
@@ -330,7 +331,8 @@ class RunTailer(threading.Thread):
                 "n_centroids": rec.get("n_centroids"),
                 "fix": ([fix["latitude"], fix["longitude"]] if fix else None),
                 "smoothed": ([sm["latitude"], sm["longitude"]] if sm else None),
-                "smoothed_n": (sm or {}).get("n_fixes"),
+                "smoothed_n": (rec.get("fix_smoothed") or {}).get("n_fixes"),
+                "nav_source": (sm or {}).get("source", "smoothed" if sm else None),
                 "wave": (rec.get("wave") or {}).get("applied"),
                 "err_nmi": err, "err_smoothed_nmi": err_sm,
             })
@@ -887,6 +889,7 @@ class Handler(BaseHTTPRequestHandler):
                    "--duration-min", str(body.get("duration_min", 15))]
             for flag, key in (("--wave-s", "wave_s"),
                               ("--smooth-s", "smooth_s"),
+                              ("--nav-s", "nav_s"),
                               ("--interval-s", "interval_s"),
                               ("--png-every", "png_every")):
                 if body.get(key) is not None:

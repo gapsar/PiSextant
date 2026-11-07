@@ -17,3 +17,6 @@ webui/webui_config.json
 webui/tiles/
 webui/tiles_download/
 webui/*.log
+
+# Backups (<file>.bak-<date>)
+*.bak-*

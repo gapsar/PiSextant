@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Star-anchored IMU mean -- LOGGED ONLY in capture_run_wave.py (v2.4).
+"""Star-anchored IMU mean -- the navigation output fix_nav of
+capture_run_wave.py since v2.5 (logged only in v2.4).
 
 The live fix uses the gravity of the exposures of the solved frames only.
 At sea, that gated sampling leaves a slow error that the 60 s mean of the
-fixes does not remove (sea tests, October 2026). This class
+fixes does not remove (docs/wave-work.md). This class
 uses ALL IMU samples instead:
 
 1. Between two solved frames less than MAX_GAP_S apart, the attitude of

@@ -17,8 +17,11 @@ gives the latitude and the longitude.
 
 Each frame gives one fix. On a moving ship, one fix has an error of 10-100
 nautical miles, mostly because the ship accelerates in the waves. These errors
-are random, so the **60-second average** of the fixes removes most of them.
-This average is the navigation output.
+are random, so a **60-second average** removes most of them. Since v2.5 the
+navigation output (`fix_nav`) averages all IMU samples of the last 60 s, each
+turned to the Earth frame with the star attitude and the gyro; this removes
+30-50 % more of the wave error than the average of the fixes (see
+[Wave work](wave-work.md)).
 
 Two rules of thumb:
 
@@ -30,7 +33,8 @@ Two rules of thumb:
 
 Results at sea, instrument fixed on the deck of a ship, compared with the
 ship's GPS. "Offset" is the median error over the full run; "60 s fix" is the
-error of the 60-second average (the navigation output).
+error of the 60-second average of the fixes (the navigation output up to
+v2.4; for v2.5 see [Wave work](wave-work.md)).
 
 | Night (2026) | Duration | Calibration | Offset | 60 s fix, median / 95 % | Solve rate |
 |---|---|---|---|---|---|
