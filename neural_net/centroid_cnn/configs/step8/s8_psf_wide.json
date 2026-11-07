@@ -1,0 +1,16 @@
+{
+ "step5": {
+  "p_instrument_groups": {
+   "psf": 0.0
+  },
+  "psf": {
+   "random": {
+    "width_px": [
+     6.0,
+     8.0
+    ]
+   }
+  }
+ },
+ "note": "unseen: PSF width 6-8 px (train 0.8-6)"
+}

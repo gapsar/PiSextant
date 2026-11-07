@@ -1,0 +1,74 @@
+{
+  "seed": 20261021,
+  "patch_px": 32,
+  "supersample_per_side": 10,
+  "background_dn": 2.0,
+  "background_note": "real median of the dev-run frames; keep",
+  "noise": {
+    "shot_noise": true,
+    "electrons_per_dn": 1.0,
+    "read_noise_sigma_dn": 0.42,
+    "white_noise_only": true,
+    "note": "placeholder, MAD artefact, to fit in step 3. Do not tune in step 1."
+  },
+  "tone_curve": "identity",
+  "quantize": true,
+  "clip_dn": [0, 255],
+  "pipeline_order": [
+    "render_linear_photons",
+    "add_background",
+    "add_noise",
+    "tone_curve",
+    "quantize_and_clip"
+  ],
+  "center_pixel_index": 16,
+  "psf_models": {
+    "gaussian_round": {
+      "shape": "gaussian",
+      "major_px": 3.3,
+      "axis_ratio": 1.0,
+      "angle_deg": 0.0
+    },
+    "gaussian_elliptical": {
+      "shape": "gaussian",
+      "major_px": 3.3,
+      "axis_ratio": 1.2,
+      "angle_deg": 30.0
+    },
+    "moffat_beta3": {
+      "shape": "moffat",
+      "major_px": 7.62,
+      "axis_ratio": 1.0,
+      "angle_deg": 0.0,
+      "beta": 3.0,
+      "note": "major_px makes FWHM equal to the round Gaussian's; beta 3 is mid-range of guide 4.1.2"
+    }
+  },
+  "checks": {
+    "flux_dn": 4760.0,
+    "com_n_positions": 50,
+    "com_offset_range_px": [-2.0, 2.0],
+    "com_offset_range_note": "guide 4.1.1: +/-(2 + L/2) px, so +/-2 px for a star at rest",
+    "com_max_bias_px": 0.01,
+    "flux_tolerance_percent": 1.0,
+    "noise_n_patches": 100,
+    "noise_mean_target_dn": 2.0,
+    "noise_std_target_dn": 1.475,
+    "noise_mean_tol_dn": 0.05,
+    "noise_std_tol_dn": 0.1,
+    "noise_zero_tol_abs": 0.01,
+    "real_frame": "runs/2026-10-15_16-00-55/images/frame_06000.png",
+    "real_frame_note": "relative to the pipeline root, resolved from the script file (v2 review item 6)",
+    "real_empty_patch_threshold_dn": 11.0,
+    "large_patch_px": 128,
+    "large_patch_note": "v2 review item 1: the renderer check runs on this patch",
+    "grid_rows": [
+      {"shape": "gaussian", "major_px": 2.5, "axis_ratio": 1.0, "angle_deg": 0.0},
+      {"shape": "gaussian", "major_px": 3.3, "axis_ratio": 1.0, "angle_deg": 0.0},
+      {"shape": "gaussian", "major_px": 4.5, "axis_ratio": 1.0, "angle_deg": 0.0},
+      {"shape": "gaussian", "major_px": 3.3, "axis_ratio": 1.2, "angle_deg": 30.0},
+      {"shape": "moffat", "major_px": 7.62, "axis_ratio": 1.0, "angle_deg": 0.0, "beta": 3.0}
+    ],
+    "grid_fluxes_dn": [680.0, 1190.0, 1632.0, 2380.0, 4760.0]
+  }
+}

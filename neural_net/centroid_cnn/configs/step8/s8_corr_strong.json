@@ -1,0 +1,16 @@
+{
+ "step5": {
+  "p_instrument_groups": {
+   "bg": 0.0
+  },
+  "background": {
+   "random": {
+    "kernel_a": [
+     0.45,
+     0.6
+    ]
+   }
+  }
+ },
+ "note": "unseen: noise correlation kernel a 0.45-0.6 (train 0-0.45)"
+}

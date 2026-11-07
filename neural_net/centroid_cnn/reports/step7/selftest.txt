@@ -1,0 +1,1 @@
+selftest: worst |COM - transformed label| over 8 symmetries = 0.00001 px -> PASS

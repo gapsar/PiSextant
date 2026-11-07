@@ -1,0 +1,16 @@
+{
+ "step5": {
+  "p_instrument_groups": {
+   "tone": 0.0
+  },
+  "bit_depth": {
+   "random": {
+    "8": 0.0,
+    "10": 0.0,
+    "12": 0.0,
+    "14": 1.0
+   }
+  }
+ },
+ "note": "unseen: 14-bit data (train 8/10/12)"
+}

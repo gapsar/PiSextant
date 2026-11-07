@@ -1,0 +1,43 @@
+{
+ "seed": 20261029,
+ "note": "Step 4 motion model (guide 4.1.5, 4.1.6, 4.2). Read by src/motion.py; the step-5 generator uses the same file. Values: guide 4.2, measured ones from reports/step4/gyro.json and trail_check_*.txt.",
+ "camera": {"f_px": 1701.3, "c_row": 648.0, "c_col": 1152.0, "height": 1296, "width": 2304,
+            "distortion_k": 0.0183, "exposure_s": 0.3},
+ "windows": {
+   "runs": ["2026-10-15_16-00-55", "2026-10-16_16-05-50"],
+   "half_s": 1.2,
+   "offset_window_s": 150,
+   "max_rate_deg_s": 10,
+   "max_rate_note": "applied within +-0.3 s of the exposure mid only (a +-1.2 s limit dropped 6% of the 16 Oct windows, the violent ones)",
+   "note": "real gyro windows (+-half_s: room for a 4x speed-up and the time shifts) around real exposure mids, camera frame, offset = mean over +-150 s. 16 Oct = the rough night (long, curved trails). Step 5 splits windows by run/time between train/val/test."
+ },
+ "synthetic_share": {
+   "fraction": 0.2,
+   "rate_factor": [1.5, 4.0],
+   "note": "a fraction of the windows is sped up (rate x factor, time compressed) to cover long trails and sharp speed changes (guide 4.1.5)"
+ },
+ "true_motion": {
+   "interp": "PCHIP through the real samples, 1 ms steps (a cubic spline overshoots: +17% length on 16 Oct)",
+   "vibration_px": [0.0, 0.5],
+   "vibration_hz": [20, 60],
+   "vibration_note": "true-only sinusoidal jitter along a random direction (guide 4.1.6); NOT in the gyro channel"
+ },
+ "rolling_shutter": {"readout_true_s": [0.010, 0.035], "readout_nominal_s": 0.018,
+                     "note": "not measured (step 4 part 1: slope not significant)"},
+ "gyro_errors": {
+   "tau_sigma_s": 0.010,
+   "tau_outlier_fraction": 0.07,
+   "tau_outlier_range_s": 0.070,
+   "offset_residual_deg_s": 0.02,
+   "white_noise_deg_s": 0.035,
+   "white_noise_factor": [0.5, 2.0],
+   "scale_error": 0.01,
+   "misalignment_deg": 0.3,
+   "f_error": 0.01,
+   "centre_error_px": 5.0,
+   "note": "tau = error of the time after the nominal correction (guide 4.2.3: spread +-20 ms = 2 sigma, plus outliers). white noise: measured upper bound 0.034-0.042 deg/s (gyro.json). Sampling: real interval sequences drawn from the same run (guide 4.2.6); linear interpolation of the samples (the live code must use the same)."
+ },
+ "patch": {"size": 32, "centre": 16.5, "max_extent_px": 14.0,
+           "note": "channel 2 mid-time point at the patch centre (corner coords). A trail whose measured path reaches > max_extent_px from its mid-time point is rejected (flagged), see WORKLOG step 4."},
+ "path_dt_s": 0.001
+}

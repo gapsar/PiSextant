@@ -1,0 +1,243 @@
+{
+  "seed": 20261021,
+  "config": "configs/step1.json",
+  "check1_com": {
+    "offset_range_px": [
+      -2.0,
+      2.0
+    ],
+    "limit_px": 0.01,
+    "models": {
+      "gaussian_round": {
+        "row": {
+          "mean_px": -3.502187151223524e-05,
+          "rms_px": 8.660696438577614e-05,
+          "max_abs_px": 0.00030012595457051816,
+          "pass": true
+        },
+        "col": {
+          "mean_px": -5.255419701992281e-05,
+          "rms_px": 9.430596925947204e-05,
+          "max_abs_px": 0.00026739426068189687,
+          "pass": true
+        }
+      },
+      "gaussian_elliptical": {
+        "row": {
+          "mean_px": -7.590231397536229e-06,
+          "rms_px": 1.1813861076455005e-05,
+          "max_abs_px": 3.425781493504587e-05,
+          "pass": true
+        },
+        "col": {
+          "mean_px": -2.4911225747388243e-05,
+          "rms_px": 4.9124299143154684e-05,
+          "max_abs_px": 0.00014199143864601638,
+          "pass": true
+        }
+      },
+      "moffat_beta3": {
+        "row": {
+          "mean_px": -0.016346304455163184,
+          "rms_px": 0.05392929540444858,
+          "max_abs_px": 0.10447149196969363,
+          "pass": false
+        },
+        "col": {
+          "mean_px": -0.025215514383677515,
+          "rms_px": 0.055803197300563025,
+          "max_abs_px": 0.11205386779462145,
+          "pass": false
+        }
+      }
+    },
+    "large_patch_px": 128,
+    "models_large_patch": {
+      "gaussian_round": {
+        "row": {
+          "mean_px": 5.684341886080802e-16,
+          "rms_px": 8.987733679556355e-15,
+          "max_abs_px": 2.1316282072803006e-14,
+          "pass": true
+        },
+        "col": {
+          "mean_px": -8.526512829121202e-16,
+          "rms_px": 8.874675925196695e-15,
+          "max_abs_px": 1.4210854715202004e-14,
+          "pass": true
+        }
+      },
+      "gaussian_elliptical": {
+        "row": {
+          "mean_px": 2.842170943040401e-16,
+          "rms_px": 9.845568954283847e-15,
+          "max_abs_px": 1.4210854715202004e-14,
+          "pass": true
+        },
+        "col": {
+          "mean_px": -1.5631940186722204e-15,
+          "rms_px": 8.101433657963767e-15,
+          "max_abs_px": 1.4210854715202004e-14,
+          "pass": true
+        }
+      },
+      "moffat_beta3": {
+        "row": {
+          "mean_px": -9.85240999727921e-05,
+          "rms_px": 0.00033052905165668417,
+          "max_abs_px": 0.0006295178807675939,
+          "pass": true
+        },
+        "col": {
+          "mean_px": -0.00015371492287684417,
+          "rms_px": 0.00034164013461571185,
+          "max_abs_px": 0.0006743527913073422,
+          "pass": true
+        }
+      }
+    },
+    "renderer_check": "PASS: all models within 0.01 px at 128 px (v2 review item 1)",
+    "note": "Moffat 32 px bias is edge truncation, expected; the large run reuses the 32 px positions and adds no draws"
+  },
+  "check2_flux": {
+    "flux_in_dn": 4760.0,
+    "tolerance_percent": 1.0,
+    "models": {
+      "gaussian_round": {
+        "flux_out_dn": 4759.985,
+        "error_percent": -0.0003,
+        "pass": true
+      },
+      "gaussian_elliptical": {
+        "flux_out_dn": 4759.997,
+        "error_percent": -0.0001,
+        "pass": true
+      },
+      "moffat_beta3": {
+        "flux_out_dn": 4640.583,
+        "error_percent": -2.5088,
+        "pass": false
+      }
+    },
+    "large_patch_px": 128,
+    "models_large_patch": {
+      "gaussian_round": {
+        "flux_out_dn": 4760.0,
+        "error_percent": -0.0,
+        "pass": true
+      },
+      "gaussian_elliptical": {
+        "flux_out_dn": 4760.0,
+        "error_percent": 0.0,
+        "pass": true
+      },
+      "moffat_beta3": {
+        "flux_out_dn": 4759.352,
+        "error_percent": -0.0136,
+        "pass": true
+      }
+    },
+    "renderer_check": "all models at 128 px; the 1% test is for a centred star well inside the patch (v2 review item 1)"
+  },
+  "check3_background_noise": {
+    "config_part_note": "the config targets are placeholders (MAD artefact); this part compares the model to itself",
+    "target_mean_dn": 2.0,
+    "target_std_dn": 1.4753,
+    "drawn_mean_dn": 1.9984,
+    "drawn_std_dn": 1.4666,
+    "exact_zero_fraction_model": 0.1512,
+    "drawn_zero_fraction": 0.1501,
+    "n_pixels_model": 102400,
+    "pass_against_config": true,
+    "real_part": {
+      "note": "real data from local empty 32x32 tiles, no pixel above 11.0 DN; fits local patches, not the whole frame (review item 1, step-3 note)",
+      "n_pixels_real": 2095104,
+      "n_tiles_real": 2046,
+      "fractions_per_dn_model": {
+        "0": 0.1501,
+        "1": 0.2552,
+        "2": 0.2611,
+        "3": 0.1812,
+        "4": 0.0955,
+        "5": 0.0378,
+        "6": 0.0135,
+        "7": 0.0041,
+        "8": 0.001,
+        "9": 0.0002,
+        "10": 0.0001
+      },
+      "fractions_per_dn_real": {
+        "0": 0.2274,
+        "1": 0.1968,
+        "2": 0.2077,
+        "3": 0.162,
+        "4": 0.1008,
+        "5": 0.0557,
+        "6": 0.0273,
+        "7": 0.0128,
+        "8": 0.0057,
+        "9": 0.0024,
+        "10": 0.001
+      },
+      "kept_tile_stats": {
+        "n_tiles_kept": 2046,
+        "n_tiles_removed": 834,
+        "per_tile_mean_dn": {
+          "min": 1.4834,
+          "p5": 1.7078,
+          "median": 2.0581,
+          "p95": 2.6917,
+          "max": 3.5752
+        },
+        "within_tile_std_mean_dn": 1.7912,
+        "pooled_std_dn": 1.8251,
+        "cut_bias_note": "the cut drops every tile with a pixel above 11 DN, so it removes high noise values, and a 680 DN star peaks near 10 DN, so faint stars stay in; both change the compared tails (v2 review items 3 and 4, LESSONS 4)"
+      }
+    },
+    "verdict": "PASS against config, FAIL against real data"
+  },
+  "check4_grid": {
+    "file": "grid_25_patches.png",
+    "stretch_max_dn": 116.0,
+    "rows": [
+      {
+        "shape": "gaussian",
+        "major_px": 2.5,
+        "axis_ratio": 1.0,
+        "angle_deg": 0.0
+      },
+      {
+        "shape": "gaussian",
+        "major_px": 3.3,
+        "axis_ratio": 1.0,
+        "angle_deg": 0.0
+      },
+      {
+        "shape": "gaussian",
+        "major_px": 4.5,
+        "axis_ratio": 1.0,
+        "angle_deg": 0.0
+      },
+      {
+        "shape": "gaussian",
+        "major_px": 3.3,
+        "axis_ratio": 1.2,
+        "angle_deg": 30.0
+      },
+      {
+        "shape": "moffat",
+        "major_px": 7.62,
+        "axis_ratio": 1.0,
+        "angle_deg": 0.0,
+        "beta": 3.0
+      }
+    ],
+    "fluxes_dn": [
+      680.0,
+      1190.0,
+      1632.0,
+      2380.0,
+      4760.0
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+run 2026-10-16: FOV 68.204 deg, distortion 0.0184, stars 290
+stars with a predicted trail >= 6 px and a usable fit: 105
+fitted width a: median 2.47, p10-p90 [1.81 3.13]
+hypothesis vs nominal (all stars | only stars with |dchi2|/var > 30):
+  mirror_col: nominal better 0.79 (median dchi2    11.0) | n  34, nominal better 1.00
+  mirror_row: nominal better 0.79 (median dchi2    11.1) | n  38, nominal better 0.92
+  swap      : nominal better 0.78 (median dchi2     9.7) | n  33, nominal better 0.97
+  neg       : nominal better 0.64 (median dchi2     1.7) | n  17, nominal better 0.82
+  no_roll   : nominal better 0.57 (median dchi2     0.3) | n   8, nominal better 0.88
+  roll_neg  : nominal better 0.68 (median dchi2     2.2) | n  18, nominal better 1.00
+rotation sign (neg), curved > 1 px, n 51: nominal better 0.76, dchi2 p10/p50/p90 [-1.7  2.4 78.7]; significant n 11, nominal better 0.91
+no_roll at r > 900, roll share > 0.3 (n 4): nominal better 0.75
+roll_neg at r > 900, roll share > 0.3 (n 4): nominal better 0.75
+tau (all, n 105): median 40 ms, at scan edge 30
+  summed dchi2/var per tau [-100, -80, -60, -40, -20, 0, 20, 40, 60, 80, 100, 120] ms:
+  [5793, 4002, 2772, 1978, 1629, 1418, 1234, 956, 1190, 1986, 2752, 2990]
+  fit (stars inside the scan): tau0 31.6 ms + row/1296 * -29.1 (SE 27.8) ms
+tau (curved, n 51): median 20 ms, at scan edge 14
+  summed dchi2/var per tau [-100, -80, -60, -40, -20, 0, 20, 40, 60, 80, 100, 120] ms:
+  [4235, 2548, 1456, 841, 712, 751, 697, 523, 730, 1355, 1854, 1973]
+  fit (stars inside the scan): tau0 35.8 ms + row/1296 * -49.7 (SE 39.0) ms
+length scale: median 1.10, p10-p90 [0.8 1.2], at the scan bounds 70

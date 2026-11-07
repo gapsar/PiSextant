@@ -1,0 +1,19 @@
+{
+ "step5": {
+  "p_instrument_groups": {
+   "motion": 0.0
+  },
+  "motion": {
+   "random": {
+    "tau_outlier_fraction": 1.0,
+    "tau_outlier_range_s": 0.07,
+    "offset_residual_deg_s": 0.1,
+    "white_noise_factor_log": [
+     3.0,
+     5.0
+    ]
+   }
+  }
+ },
+ "note": "gyro errors LARGER than training: tau uniform +-70 ms for all, offset sigma 0.1 deg/s (train 0.05), white noise x3-5 (train x0.2-3)"
+}

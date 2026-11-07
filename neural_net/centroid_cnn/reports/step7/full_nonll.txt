@@ -1,0 +1,58 @@
+step 7 -- full_nonll (channels 3), val split of v2, best epoch 55 (val huber 0.4077)
+config {"lr": 0.002, "weight_decay": 0.0001, "batch": 512, "epochs": 60, "huber_beta": 1.0, "nll_weight": 0.0, "seed": 7, "ch1_k": 4.0, "ch2_scale": 4.0, "dataset": "v2"}
+40396 parameters, 4.60 M multiply-adds per patch
+
+group                  method              n     rms   rms<2  median     p95   fail   b_row   b_col  b_along b_across
+all                    full_nonll      10000   1.082   0.720   0.426   2.169  0.065   0.001   0.006   -0.011    0.006
+
+snr 2-5                full_nonll        437   1.770   1.260   1.536   3.016  0.297  -0.017  -0.034   -0.046   -0.060
+
+snr 5-10               full_nonll        888   1.447   1.083   1.100   2.733  0.166   0.062   0.002   -0.039   -0.019
+
+snr 10-20              full_nonll       1402   1.217   0.969   0.834   2.379  0.088  -0.021   0.019   -0.024    0.003
+
+snr 20-50              full_nonll       2304   0.965   0.737   0.501   1.885  0.042   0.007   0.010   -0.014    0.019
+
+snr 50-300             full_nonll       4618   0.850   0.479   0.256   1.394  0.026  -0.004   0.006   -0.006    0.011
+
+snr 300+               full_nonll        351   1.618   0.431   0.203   2.767  0.077  -0.015  -0.013    0.118    0.003
+
+trail 0-1              full_nonll       1245   1.099   0.693   0.374   2.095  0.061  -0.030  -0.023   -0.007    0.179
+
+trail 1-3              full_nonll       4407   0.996   0.687   0.389   2.046  0.055  -0.010   0.015    0.004    0.009
+
+trail 3-10             full_nonll       3940   1.107   0.745   0.455   2.186  0.065   0.020   0.008   -0.015    0.002
+
+trail 10+              full_nonll        408   1.556   0.908   0.795   3.414  0.176   0.029  -0.026   -0.092   -0.035
+
+radius 0-600           full_nonll       4029   1.108   0.720   0.429   2.191  0.070   0.002   0.004   -0.023    0.006
+
+radius 600-1100        full_nonll       5102   1.074   0.721   0.424   2.146  0.062   0.000   0.006   -0.007    0.002
+
+radius 1100+           full_nonll        869   0.997   0.717   0.421   2.122  0.056  -0.000   0.013    0.022    0.027
+
+gyro_err 0-0.1         full_nonll       1942   1.006   0.708   0.398   2.156  0.064   0.006  -0.012    0.013   -0.010
+
+gyro_err 0.1-0.3       full_nonll       6002   1.086   0.712   0.415   2.137  0.064  -0.010   0.008   -0.015    0.008
+
+gyro_err 0.3-1         full_nonll       1862   1.089   0.741   0.456   2.178  0.061   0.019   0.022   -0.014    0.022
+
+gyro_err 1+            full_nonll        194   1.515   0.882   0.749   3.513  0.134   0.111  -0.059   -0.065   -0.059
+
+neighbour 0-8          full_nonll       1166   1.474   0.976   0.875   2.804  0.158   0.004  -0.021    0.005    0.017
+
+neighbour 8-16         full_nonll       1919   1.266   0.727   0.431   2.335  0.069  -0.027   0.013   -0.001   -0.005
+
+neighbour 16+          full_nonll       6915   0.939   0.672   0.380   1.965  0.048   0.008   0.008   -0.016    0.007
+
+sigma calibration (fraction |e|/sigma < 1, < 2 per axis; Gaussian 0.683, 0.954):
+  all: 0.788 0.886
+  snr 2-5: 0.451 0.666  median sigma 0.521 px
+  snr 5-20: 0.617 0.789  median sigma 0.576 px
+  snr 20-1e+09: 0.861 0.930  median sigma 0.775 px
+
+pixel locking (trap 14): mean error per axis vs fractional true position (snr >= 20):
+  row: +0.015 -0.024 -0.003 +0.009 -0.003   (span 0.039 px)
+  col: +0.015 -0.002 -0.001 +0.013 +0.005   (span 0.017 px)
+
+val huber last 10 epochs: first 0.4095 last 0.4078 (still falling = more data/epochs may help)

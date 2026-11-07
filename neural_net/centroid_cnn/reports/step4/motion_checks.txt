@@ -1,0 +1,16 @@
+windows 2026-10-15_16-00-55: 1000
+windows 2026-10-16_16-05-50: 1000
+C1 zero error, dense sampling (300): max path error 1.41e-04 px
+C2 trail vs PSF * ch2 (n 100): |diff|/peak median 0.0198, max 0.0264; light centroid diff max 0.0001 px
+accepted samples (max extent <= 14.0 px): 1992 of 2000
+C3 sampling only, rms path error p50/p90/p99: [0.02, 0.091, 0.372] px
+C4 gyro error model, rms path error p50/p90/p99: [0.142, 0.479, 2.734] px
+C4 plus true-only vibration, p50/p90/p99: [0.266, 0.522, 2.737] px
+   centre length 0-3 px (n 853): C3 p50/p90 [0.008, 0.048], C4 p50/p90 [0.113, 0.199]
+   centre length 3-10 px (n 974): C3 p50/p90 [0.029, 0.115], C4 p50/p90 [0.16, 0.47]
+   centre length 10-inf px (n 165): C3 p50/p90 [0.042, 0.2], C4 p50/p90 [0.837, 2.914]
+   C4 |tau| < 5 ms (n 753): p50/p90 [0.123, 0.327]
+   C4 |tau| > 20 ms (n 182): p50/p90 [0.211, 0.875]
+C5 2026-10-15 centre length p10/p50/p90/p99: gyro.json [0.806, 2.139, 4.636, 6.974] | samples k=1 [0.86, 2.11, 4.78, 7.03] | with synthetic share [0.92, 2.44, 6.39, 15.83]
+C5 2026-10-16 centre length p10/p50/p90/p99: gyro.json [1.966, 3.198, 6.398, 22.263] | samples k=1 [2.18, 3.49, 6.49, 17.54] | with synthetic share [2.33, 3.93, 11.42, 30.13]
+C5 rejected by max_extent 14.0 px: 0.004

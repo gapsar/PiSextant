@@ -1,0 +1,58 @@
+step 7 -- nogyro (channels 1), val split of v2, best epoch 55 (val huber 0.4229)
+config {"lr": 0.002, "weight_decay": 0.0001, "batch": 512, "epochs": 60, "huber_beta": 1.0, "nll_weight": 0.2, "seed": 7, "ch1_k": 4.0, "ch2_scale": 4.0, "dataset": "v2"}
+40108 parameters, 4.31 M multiply-adds per patch
+
+group                  method              n     rms   rms<2  median     p95   fail   b_row   b_col  b_along b_across
+all                    nogyro          10000   1.103   0.735   0.443   2.175  0.065   0.007  -0.002   -0.008   -0.001
+
+snr 2-5                nogyro            437   1.754   1.263   1.534   2.935  0.295  -0.005  -0.038   -0.056   -0.050
+
+snr 5-10               nogyro            888   1.459   1.113   1.092   2.675  0.155   0.058   0.002   -0.043   -0.041
+
+snr 10-20              nogyro           1402   1.222   0.978   0.836   2.306  0.089  -0.007   0.016   -0.042    0.008
+
+snr 20-50              nogyro           2304   0.984   0.736   0.503   1.879  0.044   0.012   0.007   -0.009    0.010
+
+snr 50-300             nogyro           4618   0.897   0.505   0.270   1.438  0.029  -0.003  -0.003    0.002    0.003
+
+snr 300+               nogyro            351   1.589   0.479   0.229   3.197  0.071   0.039  -0.086    0.135    0.014
+
+trail 0-1              nogyro           1245   1.057   0.703   0.377   2.071  0.057  -0.026  -0.024    0.010    0.110
+
+trail 1-3              nogyro           4407   1.003   0.697   0.397   2.042  0.053  -0.004   0.007   -0.001    0.009
+
+trail 3-10             nogyro           3940   1.145   0.764   0.490   2.201  0.068   0.023   0.001   -0.008   -0.005
+
+trail 10+              nogyro            408   1.694   0.962   0.917   3.366  0.194   0.067  -0.059   -0.064   -0.062
+
+radius 0-600           nogyro           4029   1.116   0.738   0.437   2.197  0.069   0.012  -0.003   -0.022    0.003
+
+radius 600-1100        nogyro           5102   1.095   0.735   0.448   2.145  0.062   0.003  -0.001   -0.002   -0.003
+
+radius 1100+           nogyro            869   1.085   0.718   0.446   2.253  0.069   0.005  -0.003    0.017   -0.001
+
+gyro_err 0-0.1         nogyro           1942   1.043   0.724   0.415   2.194  0.065   0.009  -0.008    0.019   -0.018
+
+gyro_err 0.1-0.3       nogyro           6002   1.085   0.726   0.434   2.152  0.064  -0.005  -0.001   -0.015    0.002
+
+gyro_err 0.3-1         nogyro           1862   1.145   0.760   0.488   2.155  0.065   0.032   0.009   -0.016    0.014
+
+gyro_err 1+            nogyro            194   1.679   0.878   0.694   3.548  0.129   0.123  -0.087    0.027   -0.049
+
+neighbour 0-8          nogyro           1166   1.514   0.996   0.899   2.849  0.158   0.012  -0.013    0.016    0.011
+
+neighbour 8-16         nogyro           1919   1.296   0.728   0.459   2.367  0.074  -0.021   0.011   -0.008   -0.003
+
+neighbour 16+          nogyro           6915   0.952   0.690   0.394   1.973  0.047   0.014  -0.004   -0.012   -0.002
+
+sigma calibration (fraction |e|/sigma < 1, < 2 per axis; Gaussian 0.683, 0.954):
+  all: 0.763 0.959
+  snr 2-5: 0.634 0.929  median sigma 1.129 px
+  snr 5-20: 0.715 0.959  median sigma 0.921 px
+  snr 20-1e+09: 0.786 0.960  median sigma 0.370 px
+
+pixel locking (trap 14): mean error per axis vs fractional true position (snr >= 20):
+  row: +0.019 -0.013 +0.005 +0.010 -0.001   (span 0.031 px)
+  col: +0.007 -0.010 -0.007 -0.003 -0.006   (span 0.018 px)
+
+val huber last 10 epochs: first 0.4244 last 0.4231 (still falling = more data/epochs may help)

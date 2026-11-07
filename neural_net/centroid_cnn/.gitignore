@@ -1,0 +1,20 @@
+# Large generated files stay out of git
+datasets/
+checkpoints/
+*.npy
+*.npz
+*.pt
+*.pth
+*.onnx
+__pycache__/
+# Added 30 Oct 2026: backups and regenerable real-data replay logs
+*.bak-*
+reports/step9/*_frames.jsonl
+reports/step9/*_smoke.jsonl
+# Added 8 Nov 2026: working area (trial scripts, raw console logs) stays local
+scratch/
+# Added 8 Nov 2026: internal work notes stay local (not published)
+GUIDE.md
+LESSONS.md
+WORKLOG.md
+HANDOFF_STEP7.md

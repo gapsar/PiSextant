@@ -1,0 +1,44 @@
+{
+  "seed": 20261023,
+  "snr_bins": [3, 5, 8, 12, 20, 40, 80],
+  "snr_definition": "CONVENTIONS.md section SNR (review note a); F solved per bin from sigma_pix and s",
+  "noise_note": "noise model is the step-1 placeholder (MAD artefact); step 3 fits it. Slopes and ratios to the bound are the step-2 result; absolute values are provisional.",
+  "background_dn": 2.0,
+  "noise": {
+    "electrons_per_dn": 1.0,
+    "read_noise_sigma_dn": 0.42
+  },
+  "quantize": true,
+  "clip_dn": [0, 255],
+  "patch_px": 32,
+  "supersample_per_side": 10,
+  "center_pixel_index": 16,
+  "offset_range_px": 1.0,
+  "n_draws": 2000,
+  "n_fisher_draws": 200,
+  "com_edge_ring_px": 1,
+  "com_threshold_sigmas": 3.0,
+  "noise_free_check_flux_dn": 20000.0,
+  "noise_free_check_note": "fixed flux for the noise-free checks (redesigned 23 Oct: at bin fluxes the trail light falls under the COM threshold, so the per-cell check cannot survive); noise off, quantize on; clips the rest cells only (symmetric); see noise_free_checks for the tolerance design",
+  "trail_states": {
+    "rest": [0.0],
+    "uniform_5px": [5.0],
+    "uniform_15px": [15.0],
+    "nonuniform_15px": [2.0, 3.0, 4.0, 6.0]
+  },
+  "rest_note": "rest is a point source at the label (one zero-distance segment); changed from 15.0 on 23 Oct so rest is not a copy of uniform_15px",
+  "trail_note": "segment list = px moved per EQUAL time step (constant speed: one segment = whole trail, all 0.1 px sub-steps share the light equally). nonuniform = speed ramp 1x->1.5x->2x->3x along the trail, review note f. Trail axis = +col.",
+  "nonuniform_mirror": {"name": "nonuniform_15px_mirror", "segments": [6.0, 4.0, 3.0, 2.0], "note": "mechanism test for the COM bias direction (LESSONS 1): ramp 3x->1x. Predicted: mean vs mid-time label flips sign per axis. It runs at the top four SNR bins only."},
+  "nonuniform_mirror_bins": [12, 20, 40, 80],
+  "label_note": "label = mid-time position = patch centre (CONVENTIONS Patch centre); the trail is placed around it",
+  "shapes": ["gaussian", "moffat"],
+  "gaussian_params": {"shape": "gaussian", "major_px": 3.3, "axis_ratio": 1.0, "angle_deg": 0.0},
+  "moffat_params": {"shape": "moffat", "major_px": 7.62, "axis_ratio": 1.0, "angle_deg": 0.0, "beta": 3.0},
+  "fits": ["gaussian", "moffat"],
+  "fit_names": {
+    "gaussian_on_gaussian": "matched, same model as rendered",
+    "moffat_on_moffat": "matched, same model as rendered",
+    "gaussian_on_moffat": "model mismatch, separate line (review note g)"
+  },
+  "crlb_note": "numeric Fisher from this noise model; parameters row, col, flux, background; ignores 8-bit rounding and the clip at 0, so it is a floor and the gap grows at low SNR (review note d)"
+}

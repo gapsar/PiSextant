@@ -1,0 +1,10 @@
+{
+ "feature": "peak",
+ "threshold": 53.349,
+ "max_shift_px": 99.0,
+ "model": "step7_full_v3_e120",
+ "chosen_on": "v2 val, lowest mean Huber",
+ "val_huber": 0.3827001716502902,
+ "val_refined_fraction": 0.06,
+ "gyro_fit_ms_per_star_laptop": 5.820749998092651
+}

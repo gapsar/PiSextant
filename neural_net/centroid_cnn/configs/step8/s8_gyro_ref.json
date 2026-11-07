@@ -1,0 +1,8 @@
+{
+ "step5": {
+  "p_instrument_groups": {
+   "motion": 0.0
+  }
+ },
+ "note": "motion group always random (training errors): reference for s8_gyro_large"
+}

@@ -1,0 +1,6 @@
+overfit step     1  huber 1.00334
+overfit step   100  huber 0.06854
+overfit step   500  huber 0.00005
+overfit step  1000  huber 0.00000
+overfit step  1500  huber 0.00003
+overfit: final huber 2.82e-05 (prediction < 1e-3) -> PASS

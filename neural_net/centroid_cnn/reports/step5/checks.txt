@@ -1,0 +1,64 @@
+train: 100000 samples, 56 parameters
+K1 constant parameters: none
+   row                  p1      32.56  p50      648.9  p99       1264
+   col                  p1      42.56  p50       1154  p99       2261
+   r_px                 p1      96.07  p50      681.5  p99       1220
+   psf_inst             p1          0  p50          0  p99          1
+   bg_inst              p1          0  p50          0  p99          1
+   tone_inst            p1          0  p50          0  p99          1
+   motion_inst          p1          0  p50          0  p99          1
+   snr                  p1      2.666  p50      47.22  p99       2462
+   flux_lin             p1      19.06  p50      517.1  p99   2.77e+04
+   s_eff                p1     0.7965  p50      2.253  p99      5.587
+   psf_model            p1          0  p50          0  p99          3
+   a1                   p1     0.9596  p50      3.011  p99       16.7
+   a2                   p1      0.697  p50      2.132  p99      12.07
+   angle                p1      2.075  p50      89.75  p99      177.9
+   psf_p                p1          0  p50      1.643  p99      5.763
+   coma_frac            p1          0  p50          0  p99     0.2823
+   tone_kind            p1          0  p50          1  p99          3
+   tone_par             p1          0  p50          0  p99      3.906
+   bit_depth            p1          8  p50          8  p99         12
+   mu                   p1      0.178  p50      2.928  p99      19.64
+   sigma                p1     0.8551  p50      1.985  p99      3.945
+   skew_s               p1    0.00835  p50     0.2211  p99     0.4923
+   kernel_a             p1   0.007223  p50      0.287  p99     0.4418
+   kernel_b             p1   -0.09255  p50   -0.05426  p99 -0.0002517
+   c1                   p1     0.3469  p50      1.437  p99      2.956
+   slope                p1          0  p50          0  p99      2.899
+   n_neigh              p1          0  p50          1  p99          6
+   hard_neigh           p1          0  p50          0  p99          1
+   nearest_neigh_px     p1      2.757  p50      22.86  p99         99
+   n_hot                p1          0  p50          0  p99          2
+   hot_per_mpx          p1      2.799  p50       45.3  p99      147.5
+   streak               p1          0  p50          0  p99          1
+   cosmic               p1          0  p50          0  p99          0
+   bad                  p1          0  p50          0  p99          1
+   rate_factor          p1          1  p50          1  p99      3.856
+   tau_s                p1   -0.06679  p50  0.0001666  p99    0.06928
+   readout_s            p1  0.0006463  p50    0.02134  p99    0.03932
+   gyro_noise_deg_s     p1   0.007313  p50    0.03562  p99     0.1004
+   sampling_hz          p1          0  p50          0  p99      463.2
+   vib_px               p1   0.006918  p50     0.3576  p99      0.983
+   centre_len_px        p1     0.4406  p50      2.865  p99      17.83
+   trail_chord_px       p1     0.1948  p50      2.313  p99      14.71
+   meas_err_rms_px      p1     0.0406  p50     0.1845  p99      1.803
+   light_minus_label_r  p1    -0.3182  p50  -0.001052  p99     0.3271
+   light_minus_label_c  p1    -0.6661  p50  0.0006871  p99     0.6764
+   resamples            p1          0  p50          0  p99          0
+   psf_radius_px        p1         12  p50         12  p99         28
+   sigma_frame          p1     0.5574  p50      2.857  p99      131.7
+   bg_est               p1          0  p50          8  p99      647.5
+   window_run           p1          0  p50          1  p99          3
+   window_index         p1         59  p50       2988  p99       5939
+   det_snr              p1      3.762  p50      13.48  p99      250.1
+   coarse_minus_light_px p1    0.02271  p50     0.4677  p99      5.399
+   rej_undetected       p1          0  p50          0  p99          3
+   rej_owned            p1          0  p50          0  p99          1
+   rej_off_field        p1          0  p50          0  p99          0
+K2 regenerate train[0:500] bit-identical: True
+K5 label sub-pixel phase row: counts [10055, 9782, 10062, 10098, 10002, 10002, 10013, 9913, 10111, 9962], chi2 p 0.480
+K5 label sub-pixel phase col: counts [9948, 10048, 10029, 10039, 9987, 9904, 9912, 10174, 9953, 10006], chi2 p 0.769
+K6 |y| p50 0.41, p99 3.80, max 12.41 px
+K3 label recovery (independent renderer, n 165): max 0.0023 px, median 0.00004 px, by model {'moffat': 0.0007239259557394801, 'gaussian': 0.00016404634737942112, 'super_gaussian': 0.0022620615478493216}
+K4 channel 2 first moment vs true-path time mean (n 300): max 0.00406 px

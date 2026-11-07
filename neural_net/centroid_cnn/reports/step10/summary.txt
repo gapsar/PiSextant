@@ -1,0 +1,8 @@
+Step 10 export -- 2026-11-06 01:43
+model step7_full_v3_e120 arch a, 40396 parameters, in_ch 3, k1 4.0, s2 4.0
+files: export/model.onnx (167472 B, opset 17, input x (n,3,32,32) float32, outputs mu, log_sigma), export/cnn_weights.npz (166994 B)
+check on 1000 v3 test patches: max |mu onnx - torch| 3.93e-06 px, max |mu numpy - torch| 4.77e-06 px, max log_sigma diff 1.58e-06 -> PASS (limit 1e-4 px)
+torch RMSE vs label on these patches 1.1909 px (sanity)
+laptop CPU one thread, 95 patches: torch 13.84 ms, onnxruntime 9.46 ms, numpy 39.09 ms; onnxruntime 1 patch 0.133 ms
+per patch numpy 0.411 ms -> Pi estimate x10-20: 4.11-8.23 ms per patch, 391-782 ms per frame (budget ~1 ms / ~100 ms)
+Pi measurement: ~/soft-env/bin/python pi_cnn.py --bench cnn_weights.npz

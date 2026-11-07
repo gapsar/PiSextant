@@ -1,0 +1,163 @@
+=== 2026-10-17_16-00-56: 2018 saved images, 2018 with stars
+stars per frame: centroids median 95, CNN used 0.964 (edge 6851, path > 14 px 0), hybrid refined 23 stars; sigma_frame median 1.81 DN
+CNN - cedar shift, all used stars (n 184841): mean row +0.037 col +0.020 px, median +0.028 +0.017, robust std 0.622 0.655
+   ch1 peak 0-10 sigma: n 167761  mean shift +0.031 +0.018  robust std 0.651 0.675  CNN sigma median 0.924
+   ch1 peak 10-30 sigma: n  16602  mean shift +0.081 +0.047  robust std 0.378 0.473  CNN sigma median 0.291
+   ch1 peak 30-100 sigma: n    478  mean shift +0.368 -0.291  robust std 0.334 0.401  CNN sigma median 0.227
+prod    solved 1941/2018 (0.962)
+cnn     solved 1944/2018 (0.963)
+hybrid  solved 1943/2018 (0.963)
+paired frames (all three solved): 1941
+  prod    RMSE median 170.41 arcsec, mean 172.89; ratio to prod median 1.000, frames lower than prod 0.000; matches median 19 mean 18.9
+  cnn     RMSE median 145.68 arcsec, mean 149.13; ratio to prod median 0.863, frames lower than prod 0.884; matches median 19 mean 19.0
+  hybrid  RMSE median 145.68 arcsec, mean 149.13; ratio to prod median 0.863, frames lower than prod 0.884; matches median 19 mean 19.0
+  fix error vs GPS, nmi (paired frames with a fix): median N / E (offset), robust std N / E, median |e|, frames > 300 nmi from the night median (false solves); 60 s means: median |e|
+  prod    offset  -0.85  -0.57  robust std  14.51  26.42  median |e|  23.66  false 0  60 s: median |e| 11.24 (n 202)
+  cnn     offset  -0.97  -0.79  robust std  14.50  26.36  median |e|  23.86  false 0  60 s: median |e| 11.18 (n 202)
+  hybrid  offset  -0.97  -0.79  robust std  14.50  26.36  median |e|  23.86  false 0  60 s: median |e| 11.18 (n 202)
+  light-offset test (stars with |m1| > 0.3 px): CNN - cedar shift vs m1 = expected light centre - mid-time (slope -1 = CNN at mid time, cedar at light centre)
+    row: n      0  slope +nan
+    col: n      0  slope +nan
+    |m1| 0.1-0.3 px: n   5116  mean |m1| 0.116  mean shift along m1 -0.050  (expected -|m1| if cedar = light centre)
+  fix error by roll phase (sign of the frame-mean m1 row / col, frames with |mean m1| > 0.1 px): mean N / E nmi
+    prod    (-1,+1) n   15 +19.70 +50.00 | (+1,-1) n   13 -13.42 -46.16  spread N 33.11 E 96.16
+    cnn     (-1,+1) n   15 +19.72 +49.73 | (+1,-1) n   13 -13.40 -46.28  spread N 33.12 E 96.00
+    hybrid  (-1,+1) n   15 +19.72 +49.73 | (+1,-1) n   13 -13.40 -46.28  spread N 33.12 E 96.00
+
+=== 2026-10-18_16-19-09: 1378 saved images, 1378 with stars
+stars per frame: centroids median 95, CNN used 0.965 (edge 4608, path > 14 px 10), hybrid refined 20 stars; sigma_frame median 1.63 DN
+CNN - cedar shift, all used stars (n 126292): mean row +0.049 col +0.025 px, median +0.033 +0.007, robust std 0.657 0.705
+   ch1 peak 0-10 sigma: n 113467  mean shift +0.046 +0.032  robust std 0.683 0.734  CNN sigma median 0.940
+   ch1 peak 10-30 sigma: n  12094  mean shift +0.071 -0.029  robust std 0.475 0.491  CNN sigma median 0.421
+   ch1 peak 30-100 sigma: n    731  mean shift +0.109 -0.177  robust std 0.255 0.289  CNN sigma median 0.351
+prod    solved 1291/1378 (0.937)
+cnn     solved 1291/1378 (0.937)
+hybrid  solved 1291/1378 (0.937)
+paired frames (all three solved): 1291
+  prod    RMSE median 173.44 arcsec, mean 179.83; ratio to prod median 1.000, frames lower than prod 0.000; matches median 17 mean 16.5
+  cnn     RMSE median 145.20 arcsec, mean 151.18; ratio to prod median 0.844, frames lower than prod 0.900; matches median 17 mean 16.7
+  hybrid  RMSE median 145.40 arcsec, mean 151.23; ratio to prod median 0.845, frames lower than prod 0.900; matches median 17 mean 16.7
+  fix error vs GPS, nmi (paired frames with a fix): median N / E (offset), robust std N / E, median |e|, frames > 300 nmi from the night median (false solves); 60 s means: median |e|
+  prod    offset  +0.78  -1.81  robust std  13.38  18.93  median |e|  18.60  false 0  60 s: median |e|  7.99 (n 144)
+  cnn     offset  +0.66  -1.85  robust std  13.28  19.11  median |e|  18.53  false 0  60 s: median |e|  8.11 (n 144)
+  hybrid  offset  +0.66  -1.85  robust std  13.28  19.11  median |e|  18.53  false 0  60 s: median |e|  8.11 (n 144)
+  light-offset test (stars with |m1| > 0.3 px): CNN - cedar shift vs m1 = expected light centre - mid-time (slope -1 = CNN at mid time, cedar at light centre)
+    row: n  31761  slope -0.666
+    col: n  31761  slope -0.607
+    |m1| 0.1-0.3 px: n  53896  mean |m1| 0.183  mean shift along m1 -0.108  (expected -|m1| if cedar = light centre)
+    |m1| 0.3-0.6 px: n  19992  mean |m1| 0.407  mean shift along m1 -0.218  (expected -|m1| if cedar = light centre)
+    |m1| 0.6-1 px: n   5990  mean |m1| 0.765  mean shift along m1 -0.429  (expected -|m1| if cedar = light centre)
+    |m1| 1-2 px: n   4237  mean |m1| 1.345  mean shift along m1 -0.765  (expected -|m1| if cedar = light centre)
+    |m1| 2-1e+09 px: n   1542  mean |m1| 3.212  mean shift along m1 -2.070  (expected -|m1| if cedar = light centre)
+  fix error by roll phase (sign of the frame-mean m1 row / col, frames with |mean m1| > 0.1 px): mean N / E nmi
+    prod    (-1,-1) n  378  +0.18  -2.64 | (-1,+1) n   21  +4.73 +10.68 | (+1,-1) n   21  -7.41 -14.01 | (+1,+1) n  434  +0.62  -1.49  spread N 12.14 E 24.68
+    cnn     (-1,-1) n  378  +0.49  -2.77 | (-1,+1) n   21  +4.70 +10.23 | (+1,-1) n   21  -7.46 -14.16 | (+1,+1) n  434  +0.03  -1.68  spread N 12.16 E 24.39
+    hybrid  (-1,-1) n  378  +0.50  -2.77 | (-1,+1) n   21  +4.70 +10.23 | (+1,-1) n   21  -7.46 -14.16 | (+1,+1) n  434  +0.03  -1.68  spread N 12.16 E 24.39
+
+=== 2026-10-14_15-01-37: 127 saved images, 127 with stars
+stars per frame: centroids median 95, CNN used 0.962 (edge 456, path > 14 px 0), hybrid refined 13 stars; sigma_frame median 0.88 DN
+CNN - cedar shift, all used stars (n 11609): mean row +0.067 col +0.042 px, median +0.046 +0.028, robust std 0.701 0.647
+   ch1 peak 0-10 sigma: n   7470  mean shift +0.069 +0.050  robust std 0.740 0.669  CNN sigma median 0.995
+   ch1 peak 10-30 sigma: n   3963  mean shift +0.069 +0.032  robust std 0.657 0.620  CNN sigma median 0.925
+   ch1 peak 30-100 sigma: n    176  mean shift -0.051 -0.047  robust std 0.179 0.178  CNN sigma median 1.014
+prod    solved 91/127 (0.717)
+cnn     solved 91/127 (0.717)
+hybrid  solved 91/127 (0.717)
+paired frames (all three solved): 91
+  prod    RMSE median 172.45 arcsec, mean 184.21; ratio to prod median 1.000, frames lower than prod 0.000; matches median 11 mean 11.3
+  cnn     RMSE median 144.61 arcsec, mean 146.20; ratio to prod median 0.833, frames lower than prod 0.868; matches median 11 mean 11.5
+  hybrid  RMSE median 144.61 arcsec, mean 146.19; ratio to prod median 0.833, frames lower than prod 0.868; matches median 11 mean 11.5
+  fix error vs GPS, nmi (paired frames with a fix): median N / E (offset), robust std N / E, median |e|, frames > 300 nmi from the night median (false solves); 60 s means: median |e|
+  prod    offset  -0.99 +13.16  robust std  50.02  61.65  median |e|  56.80  false 0  60 s: median |e| 15.22 (n 4)
+  cnn     offset  -1.17 +13.20  robust std  49.47  63.45  median |e|  57.20  false 0  60 s: median |e| 15.12 (n 4)
+  hybrid  offset  -1.17 +13.20  robust std  49.47  63.45  median |e|  57.20  false 0  60 s: median |e| 15.12 (n 4)
+  light-offset test (stars with |m1| > 0.3 px): CNN - cedar shift vs m1 = expected light centre - mid-time (slope -1 = CNN at mid time, cedar at light centre)
+    row: n     93  slope -1.321
+    col: n     93  slope -0.609
+    |m1| 0.1-0.3 px: n   1907  mean |m1| 0.136  mean shift along m1 -0.058  (expected -|m1| if cedar = light centre)
+    |m1| 1-2 px: n     55  mean |m1| 1.482  mean shift along m1 -0.933  (expected -|m1| if cedar = light centre)
+  fix error by roll phase (sign of the frame-mean m1 row / col, frames with |mean m1| > 0.1 px): mean N / E nmi
+
+=== 2026-10-14_15-05-44: 1616 saved images, 1616 with stars
+stars per frame: centroids median 95, CNN used 0.964 (edge 5579, path > 14 px 0), hybrid refined 263 stars; sigma_frame median 0.88 DN
+CNN - cedar shift, all used stars (n 147941): mean row +0.067 col +0.034 px, median +0.047 +0.013, robust std 0.676 0.614
+   ch1 peak 0-10 sigma: n  88221  mean shift +0.067 +0.046  robust std 0.729 0.659  CNN sigma median 0.969
+   ch1 peak 10-30 sigma: n  56714  mean shift +0.071 +0.020  robust std 0.632 0.580  CNN sigma median 0.896
+   ch1 peak 30-100 sigma: n   3006  mean shift -0.038 -0.052  robust std 0.191 0.150  CNN sigma median 0.977
+prod    solved 831/1616 (0.514)
+cnn     solved 831/1616 (0.514)
+hybrid  solved 830/1616 (0.514)
+paired frames (all three solved): 818
+  prod    RMSE median 175.29 arcsec, mean 183.16; ratio to prod median 1.000, frames lower than prod 0.000; matches median 10 mean 10.5
+  cnn     RMSE median 131.89 arcsec, mean 143.36; ratio to prod median 0.769, frames lower than prod 0.891; matches median 10 mean 10.6
+  hybrid  RMSE median 131.89 arcsec, mean 143.36; ratio to prod median 0.769, frames lower than prod 0.891; matches median 10 mean 10.6
+  fix error vs GPS, nmi (paired frames with a fix): median N / E (offset), robust std N / E, median |e|, frames > 300 nmi from the night median (false solves); 60 s means: median |e|
+  prod    offset  -1.02 +14.29  robust std  41.72  52.39  median |e|  54.06  false 5  60 s: median |e| 18.55 (n 37)
+  cnn     offset  -1.06 +14.92  robust std  41.94  51.83  median |e|  54.03  false 5  60 s: median |e| 18.47 (n 37)
+  hybrid  offset  -1.06 +14.92  robust std  41.94  51.83  median |e|  54.03  false 5  60 s: median |e| 18.47 (n 37)
+  light-offset test (stars with |m1| > 0.3 px): CNN - cedar shift vs m1 = expected light centre - mid-time (slope -1 = CNN at mid time, cedar at light centre)
+    row: n      9  slope +nan
+    col: n      9  slope +nan
+    |m1| 0.1-0.3 px: n  15096  mean |m1| 0.126  mean shift along m1 -0.067  (expected -|m1| if cedar = light centre)
+  fix error by roll phase (sign of the frame-mean m1 row / col, frames with |mean m1| > 0.1 px): mean N / E nmi
+    prod    (-1,-1) n   25 +16.39 -30.09 | (+1,+1) n   32 -13.88 +69.37  spread N 30.26 E 99.46
+    cnn     (-1,-1) n   25 +16.16 -29.91 | (+1,+1) n   32 -13.88 +69.47  spread N 30.04 E 99.38
+    hybrid  (-1,-1) n   25 +16.16 -29.91 | (+1,+1) n   32 -13.88 +69.47  spread N 30.04 E 99.38
+
+=== 2026-10-20_15-36-33: 672 saved images, 672 with stars
+stars per frame: centroids median 95, CNN used 0.969 (edge 1966, path > 14 px 0), hybrid refined 147 stars; sigma_frame median 1.35 DN
+CNN - cedar shift, all used stars (n 61874): mean row +0.041 col +0.020 px, median +0.024 +0.011, robust std 0.650 0.642
+   ch1 peak 0-10 sigma: n  47305  mean shift +0.045 +0.024  robust std 0.699 0.686  CNN sigma median 0.928
+   ch1 peak 10-30 sigma: n  13895  mean shift +0.030 +0.010  robust std 0.517 0.512  CNN sigma median 0.465
+   ch1 peak 30-100 sigma: n    672  mean shift +0.009 -0.049  robust std 0.311 0.226  CNN sigma median 0.791
+prod    solved 662/672 (0.985)
+cnn     solved 662/672 (0.985)
+hybrid  solved 662/672 (0.985)
+paired frames (all three solved): 662
+  prod    RMSE median 181.20 arcsec, mean 184.59; ratio to prod median 1.000, frames lower than prod 0.000; matches median 17 mean 16.7
+  cnn     RMSE median 148.22 arcsec, mean 152.49; ratio to prod median 0.826, frames lower than prod 0.917; matches median 17 mean 16.8
+  hybrid  RMSE median 148.20 arcsec, mean 152.47; ratio to prod median 0.826, frames lower than prod 0.917; matches median 17 mean 16.8
+  fix error vs GPS, nmi (paired frames with a fix): median N / E (offset), robust std N / E, median |e|, frames > 300 nmi from the night median (false solves); 60 s means: median |e|
+  prod    offset  +3.28  -1.98  robust std  22.68  33.88  median |e|  31.20  false 0  60 s: median |e|  6.27 (n 72)
+  cnn     offset  +3.12  -2.16  robust std  22.87  33.93  median |e|  31.05  false 0  60 s: median |e|  6.35 (n 72)
+  hybrid  offset  +3.12  -2.16  robust std  22.87  33.93  median |e|  31.05  false 0  60 s: median |e|  6.34 (n 72)
+  light-offset test (stars with |m1| > 0.3 px): CNN - cedar shift vs m1 = expected light centre - mid-time (slope -1 = CNN at mid time, cedar at light centre)
+    row: n   3617  slope -0.603
+    col: n   3617  slope -0.533
+    |m1| 0.1-0.3 px: n  15589  mean |m1| 0.169  mean shift along m1 -0.087  (expected -|m1| if cedar = light centre)
+    |m1| 0.3-0.6 px: n   2979  mean |m1| 0.396  mean shift along m1 -0.226  (expected -|m1| if cedar = light centre)
+    |m1| 0.6-1 px: n    566  mean |m1| 0.748  mean shift along m1 -0.397  (expected -|m1| if cedar = light centre)
+    |m1| 1-2 px: n     72  mean |m1| 1.092  mean shift along m1 -0.437  (expected -|m1| if cedar = light centre)
+  fix error by roll phase (sign of the frame-mean m1 row / col, frames with |mean m1| > 0.1 px): mean N / E nmi
+    prod    (-1,+1) n   75 +15.37 -18.81 | (+1,-1) n  106 +10.02 -21.87  spread N 5.35 E 3.06
+    cnn     (-1,+1) n   75 +15.36 -19.18 | (+1,-1) n  106  +9.93 -21.88  spread N 5.44 E 2.70
+    hybrid  (-1,+1) n   75 +15.36 -19.18 | (+1,-1) n  106  +9.93 -21.87  spread N 5.43 E 2.70
+
+=== 2026-10-20_15-36-33_tau64: 672 saved images, 672 with stars
+stars per frame: centroids median 95, CNN used 0.969 (edge 1965, path > 14 px 0), hybrid refined 147 stars; sigma_frame median 1.35 DN
+CNN - cedar shift, all used stars (n 61875): mean row +0.046 col +0.013 px, median +0.028 +0.003, robust std 0.651 0.639
+   ch1 peak 0-10 sigma: n  47307  mean shift +0.050 +0.017  robust std 0.702 0.686  CNN sigma median 0.928
+   ch1 peak 10-30 sigma: n  13894  mean shift +0.034 +0.004  robust std 0.519 0.510  CNN sigma median 0.467
+   ch1 peak 30-100 sigma: n    672  mean shift +0.022 -0.059  robust std 0.316 0.232  CNN sigma median 0.776
+prod    solved 662/672 (0.985)
+cnn     solved 662/672 (0.985)
+hybrid  solved 662/672 (0.985)
+paired frames (all three solved): 662
+  prod    RMSE median 181.20 arcsec, mean 184.59; ratio to prod median 1.000, frames lower than prod 0.000; matches median 17 mean 16.7
+  cnn     RMSE median 148.80 arcsec, mean 152.39; ratio to prod median 0.823, frames lower than prod 0.918; matches median 17 mean 16.8
+  hybrid  RMSE median 148.80 arcsec, mean 152.35; ratio to prod median 0.823, frames lower than prod 0.918; matches median 17 mean 16.8
+  fix error vs GPS, nmi (paired frames with a fix): median N / E (offset), robust std N / E, median |e|, frames > 300 nmi from the night median (false solves); 60 s means: median |e|
+  prod    offset  +3.28  -1.98  robust std  22.68  33.88  median |e|  31.20  false 0  60 s: median |e|  6.27 (n 72)
+  cnn     offset  +3.12  -2.19  robust std  22.82  34.03  median |e|  31.05  false 0  60 s: median |e|  6.35 (n 72)
+  hybrid  offset  +3.12  -2.18  robust std  22.82  34.03  median |e|  31.05  false 0  60 s: median |e|  6.35 (n 72)
+  light-offset test (stars with |m1| > 0.3 px): CNN - cedar shift vs m1 = expected light centre - mid-time (slope -1 = CNN at mid time, cedar at light centre)
+    row: n   4450  slope -0.468
+    col: n   4450  slope -0.582
+    |m1| 0.1-0.3 px: n  16318  mean |m1| 0.174  mean shift along m1 -0.113  (expected -|m1| if cedar = light centre)
+    |m1| 0.3-0.6 px: n   4139  mean |m1| 0.391  mean shift along m1 -0.219  (expected -|m1| if cedar = light centre)
+    |m1| 0.6-1 px: n    291  mean |m1| 0.719  mean shift along m1 -0.387  (expected -|m1| if cedar = light centre)
+  fix error by roll phase (sign of the frame-mean m1 row / col, frames with |mean m1| > 0.1 px): mean N / E nmi
+    prod    (-1,+1) n  108 +15.63 -23.49 | (+1,-1) n   98 +13.31 -22.03  spread N 2.32 E 1.46
+    cnn     (-1,+1) n  108 +15.60 -23.99 | (+1,-1) n   98 +13.32 -21.88  spread N 2.29 E 2.10
+    hybrid  (-1,+1) n  108 +15.60 -23.98 | (+1,-1) n   98 +13.32 -21.88  spread N 2.29 E 2.10
+

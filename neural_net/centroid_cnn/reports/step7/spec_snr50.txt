@@ -1,0 +1,50 @@
+step 7 -- spec_snr50 (channels 3), val split of v2, best epoch 124 (val huber 0.2251)
+config {"lr": 0.002, "weight_decay": 0.0001, "batch": 512, "epochs": 200, "huber_beta": 1.0, "nll_weight": 0.2, "seed": 7, "ch1_k": 4.0, "ch2_scale": 4.0, "dataset": "v2", "min_snr": 50.0, "arch": "a"}
+40396 parameters, 4.60 M multiply-adds per patch
+
+group                  method              n     rms   rms<2  median     p95   fail   b_row   b_col  b_along b_across
+all                    spec_snr50       4969   0.922   0.494   0.258   1.471  0.028   0.042  -0.034   -0.003    0.009
+
+snr 50-300             spec_snr50       4618   0.849   0.495   0.262   1.416  0.025   0.041  -0.034   -0.011    0.010
+
+snr 300+               spec_snr50        351   1.595   0.485   0.197   2.632  0.063   0.060  -0.034    0.104    0.001
+
+trail 0-1              spec_snr50        609   0.935   0.452   0.225   1.575  0.033  -0.011  -0.067   -0.014    0.173
+
+trail 1-3              spec_snr50       2156   0.751   0.459   0.229   1.181  0.017   0.031  -0.014    0.001    0.011
+
+trail 3-10             spec_snr50       1984   1.042   0.511   0.284   1.578  0.031   0.067  -0.031    0.000    0.012
+
+trail 10+              spec_snr50        220   1.208   0.752   0.601   2.420  0.095   0.084  -0.157   -0.053   -0.066
+
+radius 0-600           spec_snr50       2022   0.994   0.502   0.260   1.494  0.028   0.048  -0.035    0.003    0.014
+
+radius 600-1100        spec_snr50       2507   0.861   0.491   0.253   1.414  0.027   0.035  -0.033   -0.014    0.002
+
+radius 1100+           spec_snr50        440   0.913   0.479   0.276   1.546  0.032   0.060  -0.029    0.030    0.027
+
+gyro_err 0-0.1         spec_snr50        956   0.726   0.492   0.232   1.429  0.021   0.038  -0.042   -0.016    0.022
+
+gyro_err 0.1-0.3       spec_snr50       2983   0.917   0.480   0.250   1.426  0.028   0.027  -0.026   -0.005    0.010
+
+gyro_err 0.3-1         spec_snr50        929   1.054   0.504   0.286   1.428  0.028   0.089  -0.039    0.025    0.003
+
+gyro_err 1+            spec_snr50        101   1.333   0.794   0.677   3.288  0.099   0.126  -0.109   -0.086   -0.046
+
+neighbour 0-8          spec_snr50        552   1.522   0.880   0.637   2.624  0.123   0.074  -0.052    0.037   -0.042
+
+neighbour 8-16         spec_snr50        888   1.263   0.486   0.278   1.798  0.046   0.046  -0.053    0.014    0.063
+
+neighbour 16+          spec_snr50       3529   0.658   0.416   0.230   0.930  0.009   0.037  -0.026   -0.013    0.004
+
+sigma calibration (fraction |e|/sigma < 1, < 2 per axis; Gaussian 0.683, 0.954):
+  all: 0.765 0.956
+  snr 2-5: nan nan  median sigma nan px
+  snr 5-20: nan nan  median sigma nan px
+  snr 20-1e+09: 0.765 0.956  median sigma 0.269 px
+
+pixel locking (trap 14): mean error per axis vs fractional true position (snr >= 20):
+  row: +0.041 +0.030 +0.046 +0.055 +0.039   (span 0.026 px)
+  col: -0.016 -0.063 -0.029 -0.028 -0.034   (span 0.047 px)
+
+val huber last 10 epochs: first 0.2272 last 0.2272 (still falling = more data/epochs may help)
